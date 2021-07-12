@@ -889,27 +889,6 @@ class EstimateResults(object):
                     f"{kw!r} not a valid keyword argument"
                     )
                 
-    
-    
-    
-    
-    
-
-
-
-
-
-
-
-
-# if __name__ == '__main__':
-    
-#     res = EstimateResults(target=Target('hello', coords=(50, -50), unit='deg'), options=est.results.options)
-#     # res = EstimateResults(target=target, options=est.results.options)
-#     # res = EstimateResults()
-    
-#     print(res)
-
 
 
 
