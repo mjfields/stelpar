@@ -20,6 +20,8 @@ STDMODELPATH = os.path.abspath(os.path.join(os.path.dirname(__file__), r'resourc
 
 INTERPSTDMODELPATH = os.path.abspath(os.path.join(os.path.dirname(__file__), r'resources/feiden_grid_std_interpolated.csv'))
 
+PARSECMODELPATH = os.path.abspath(os.path.join(os.path.dirname(__file__), r'resources/parsec_grid.csv'))
+
 GRIDCACHE = os.path.abspath(os.path.join(os.path.dirname(__file__), r'resources/.grid_cache'))
 
 FILTERPROFILESPATH = os.path.abspath(os.path.join(os.path.dirname(__file__), r'resources/Filter_Profiles'))
