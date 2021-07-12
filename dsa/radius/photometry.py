@@ -26,7 +26,15 @@ from numba import njit
 
 from dsa.config import FILTERPROFILESPATH
 from dsa.radius.metadata import PhotometryMetadata
-from dsa.utils import abs_mag, abs_mag_error, log_normal, filter_profiles_setup, flux_meta, mag_to_flux, interpolate_true, interpolate_nearest
+from dsa.utils import (abs_mag, 
+                       abs_mag_error, 
+                       log_normal, 
+                       filter_profiles_setup, 
+                       flux_meta, mag_to_flux, 
+                       interpolate_true, 
+                       interpolate_nearest, 
+                       interpolate_hybrid
+                       )
 
 import warnings
 
@@ -67,10 +75,13 @@ class MeasuredPhotometry(object):
     validate : bool, optional
         If `True`, cross-validate the catalog photometry with expected color values via E. E. Mamajek's table
         https://www.pas.rochester.edu/~emamajek/EEM_dwarf_UBVIJHK_colors_Teff.txt . The defualt is `False`.
+    isochrone_cols : list, optional
+        If the found photometry is not in the list of columns for the working isochrone model grid,
+        they are dropped from the photometry DataFrame. The default is `None`.
         
     """
     
-    def __init__(self, name, coords=None, photometry_meta=None, search_radius=5*u.arcsec, radius_step=1*u.arcsec, tol=0, lazy_tol=True, vizier_kwargs=None, validate=False):
+    def __init__(self, name, coords=None, photometry_meta=None, search_radius=5*u.arcsec, radius_step=1*u.arcsec, tol=0, lazy_tol=True, vizier_kwargs=None, validate=False, isochrone_cols=None):
         
         self.name = name
         self.coords = coords
@@ -99,6 +110,8 @@ class MeasuredPhotometry(object):
             self._vizier_kwargs = vizier_kwargs
             
         self._do_validation = validate
+        
+        self._isochrone_cols = isochrone_cols
         
         self._catalogs = self._photometry_meta.index.get_level_values('catalog').drop_duplicates().tolist()
         
@@ -606,7 +619,13 @@ class MeasuredPhotometry(object):
                     term_message = f"Failed for {self.name}: could not verify any of the photometry were correct through color and/or magnitude validation."
                     
                     return False, term_message
-            
+                
+                
+            if self._isochrone_cols is not None:
+                for i in photometry.index:
+                    
+                    if i not in self._isochrone_cols:
+                        photometry.drop(index=i, inplace=True)
             
             
             # if Vizier didn't have a parallax or parallax error, try Simbad        
@@ -695,7 +714,9 @@ class SyntheticPhotometry(object):
         The default is `None` which is acceptable if only using extinction methods.
     interp_method : str, optional
         If 'true', uses the standard interpolation method of DFInterpolator.
-        If 'nearest' uses nearest-neighbor interpolation.
+        If 'nearest' uses nearest-neighbor interpolation. If 'hybrid' uses
+        nearest-neighbor interpolation for age and DFInterpolator for mass.
+        The default is 'true'.
     extinction_kwargs : dict, optional
         Can pass additional keyword arguments to be used by the extinction functions.
     interp_kwargs : dict, optional
@@ -731,6 +752,9 @@ class SyntheticPhotometry(object):
             
         elif interp_method.lower() == 'nearest':
             self._interp_func = interpolate_nearest
+            
+        elif interp_method.lower() == 'hybrid':
+            self._interp_func = interpolate_hybrid
             
         else:
             raise ValueError(

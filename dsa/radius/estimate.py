@@ -16,8 +16,11 @@ from datetime import datetime
 
 from multiprocessing import Pool
 from tqdm import tqdm
+from contextlib import nullcontext
 
-from dsa.config import MAGMODELPATH, INTERPMAGMODELPATH, STDMODELPATH, INTERPSTDMODELPATH, GRIDCACHE
+import emcee
+
+from dsa.config import MAGMODELPATH, INTERPMAGMODELPATH, STDMODELPATH, INTERPSTDMODELPATH, PARSECMODELPATH, GRIDCACHE
 from dsa.radius.photometry import MeasuredPhotometry, SyntheticPhotometry
 from dsa.radius.simulation import Probability, MCMC
 from dsa.radius.target import Target
@@ -45,19 +48,24 @@ class Estimate(object):
         The default is 'mag'.
     interp_method : str, optional
         If 'true', uses the standard interpolation method of DFInterpolator.
-        If 'nearest' uses nearest-neighbor interpolation.
+        If 'nearest' uses nearest-neighbor interpolation. If 'hybrid' uses
+        nearest-neighbor interpolation for age and DFInterpolator for mass.
+        The default is 'true'.
     use_synphot : bool, optional
         Use the built-in synphot methods to calculate extinction or calculate 
         extinction with `numpy` arrays which is faster. The default is False.
     zero_extinction : bool, optional
         If `True`, set extinction to zero (Av=0). The default is `False`.
+    walker_init_tol : int, optional
+        How many attempts should be made to initialize the walker positions
+        before the simulation starts? The deault is 1000.
     meas_phot_kwargs : dict, optional
         Keyword arguments to pass to `:class: dsa.radius.MeasuredPhotometry`.
         The default is `None`.
     
     """
     
-    def __init__(self, target, isochrone='mag', interp_method='true', use_synphot=False, zero_extinction=False, meas_phot_kwargs=None):
+    def __init__(self, target, isochrone='mag', interp_method='true', use_synphot=False, zero_extinction=False, walker_init_tol=1000, meas_phot_kwargs=None):
         
         ## setup target-specific metadata
         
@@ -90,7 +98,7 @@ class Estimate(object):
             if self._interp_method.lower() == 'true':
                 gridpath = MAGMODELPATH
                 
-            if self._interp_method.lower() == 'nearest':
+            if self._interp_method.lower() == 'nearest' or self._interp_method.lower() == 'hybrid':
                 gridpath = INTERPMAGMODELPATH
         
         elif self._isochrone.lower() == 'std':
@@ -98,28 +106,50 @@ class Estimate(object):
             if self._interp_method.lower() == 'true':
                 gridpath = STDMODELPATH
                 
-            if self._interp_method.lower() == 'nearest':
+            if self._interp_method.lower() == 'nearest' or self._interp_method.lower() == 'hybrid':
                 gridpath = INTERPSTDMODELPATH
+        
+        elif self._isochrone.lower() == 'parsec':
+            
+            if self._interp_method.lower() == 'true':
+                raise ValueError(
+                    "invalid interpolation method: 'true' interpolation is too slow on the PARSEC grid. "
+                    "Choose a different interpolation method or use a different isochrone grid."
+                    )
+                
+            if self._interp_method.lower() == 'nearest' or self._interp_method.lower() == 'hybrid':
+                gridpath = PARSECMODELPATH
             
         else:
             raise ValueError(
-                "invalid isochrone: can only be 'mag' or 'std'"
+                "invalid isochrone: can only be 'mag', 'std', or 'parsec'"
                 )
         
         
         if self._interp_method.lower() == 'true':
             self._model_grid = load_isochrone(gridpath)
             
+            if self._isochrone.lower() == 'parsec':
+                isochrone_cols = self._model_grid.columns.values
+            else:
+                isochrone_cols = None
+            
             self._agelist = None
             self._masslist = None
         
-        if self._interp_method.lower() == 'nearest':
-            with WaitingAnimation("loading isochrone model grid", delay=0.25):
+        if self._interp_method.lower() == 'nearest' or self._interp_method.lower() == 'hybrid':
+            with WaitingAnimation("loading isochrone model grid", delay=0.5):
                 grid = load_isochrone(gridpath)
                 print('')
-            
+                
             self._agelist = grid.index.get_level_values('age').drop_duplicates()
-            self._masslist = grid.index.get_level_values('mass').drop_duplicates()
+            
+            if self._isochrone.lower() == 'parsec':
+                isochrone_cols = grid.columns.values
+                self._masslist = None
+            else:
+                isochrone_cols = None
+                self._masslist = grid.index.get_level_values('mass').drop_duplicates()
             
             grid.to_pickle(GRIDCACHE)
             
@@ -138,6 +168,11 @@ class Estimate(object):
         self._zero_extinction = zero_extinction
         
         
+        ## check the walker positions initialization tolerance
+        
+        self._walker_init_tol = walker_init_tol
+        
+        
         ## handle any kwargs for MeasuredPhotometry
         
         if meas_phot_kwargs is None:
@@ -148,7 +183,7 @@ class Estimate(object):
         
         ## collect data, initialize classes, and setup functions
         
-        self._mp = MeasuredPhotometry(self.target, self.coords, photometry_meta=self._phot_meta, **self._meas_phot_kwargs)
+        self._mp = MeasuredPhotometry(self.target, self.coords, photometry_meta=self._phot_meta, isochrone_cols=isochrone_cols, **self._meas_phot_kwargs)
         
         self.photometry, self._termination_message = self._mp.get_data()
         
@@ -176,6 +211,21 @@ class Estimate(object):
         self._run_date = None
         self._sim_runtime = None
         self._posterior_extract_time = None
+        
+        
+        ## EstimateResults object to store results
+        
+        self.results = EstimateResults(
+            target=target,
+            options={
+                'isochrone' : self._isochrone,
+                'interp_method' : self._interp_method,
+                'use_synphot' : self._use_synphot,
+                'zero_extinction' : self._zero_extinction,
+                'walker_init_tol' : self._walker_init_tol,
+                'meas_phot_kwargs' : self._meas_phot_kwargs,
+                }
+            )
         
         
         
@@ -214,10 +264,13 @@ class Estimate(object):
         
         if verbose:
             print(f"\nrunning MCMC for {self.target:s}:")
+            walker_context = WaitingAnimation("initializing walker positions", delay=0.5)
+        else:
+            walker_context = nullcontext()
             
         time.sleep(1)
         
-        mcmc = MCMC(nwalkers, nsteps, self.log_prob_fn, self._ic, self._moves, pool=self._pool, zero_extinction=self._zero_extinction)
+        mcmc = MCMC(nwalkers, nsteps, self.log_prob_fn, self._ic, self._moves, pool=self._pool, zero_extinction=self._zero_extinction, walker_init_tol=self._walker_init_tol, walker_init_context=walker_context)
         
         mcmc.run(progress=True)
         
@@ -229,6 +282,22 @@ class Estimate(object):
         stop = time.time()
         delta = stop-start
         self._sim_runtime = time.strftime('%H:%M:%S', time.gmtime(delta))
+        
+        
+        options = self.results.options
+        options.update(nwalkers=nwalkers, nsteps=nsteps)
+        
+        self.results.add_kwarg(
+            options=options,
+            sampler=sampler,
+            stats={
+                'mean_acceptance_frac' : float(f'{np.mean(sampler.acceptance_fraction):.3f}'),
+                'median_autocorr_time' : float(f'{np.median(sampler.get_autocorr_time(tol=0)):.3f}'),
+                'date' : self._run_date,
+                'sim_runtime' : self._sim_runtime
+                }
+            )
+        
         
         
         return sampler
@@ -444,7 +513,7 @@ class Estimate(object):
             'interp_method' : self._interp_method,
             'use_synphot' : self._use_synphot,
             'zero_extinction' : self._zero_extinction,
-            'force_posterior_interp_true' : force_true_interp,
+            'force_posterior_true_interp' : force_true_interp,
             'nwalkers' : sampler.nwalkers,
             'nsteps' : len(samples()),
             'discard' : discard,
@@ -461,6 +530,20 @@ class Estimate(object):
         posterior_chains = DSADataFrame(posterior_chains.copy(), meta_base_type='chains', metadata=metadata)
         
         
+        options = self.results.options
+        options.update(discard=discard, thin=thin, force_posterior_true_interp=force_true_interp)
+        stats = self.results.stats
+        stats.update(posterior_extract_time=self._posterior_extract_time)
+        
+        self.results.add_kwarg(
+            posterior=posterior,
+            photometry=photometry,
+            chains=posterior_chains,
+            options=options,
+            stats=stats
+            )
+        
+        
         return posterior, photometry, posterior_chains
         
         
@@ -469,7 +552,7 @@ class Estimate(object):
     def _max_log_probability(self, coords, progress=True):
         """
         Returns the maximum of the caluclated log probabilities and its index. 
-        Simplified version of :func: `emcee.EnsembleSampler.sampler.compute_log_prob`
+        Simplified version of :func: `emcee.EnsembleSampler.compute_log_prob`
         for this use case (no need for blobs).
         
         Parameters
@@ -508,6 +591,7 @@ class Estimate(object):
             time.sleep(1)
         else:
             results = list(map_func(self.log_prob_fn, (p[i] for i in range(len(p)))))
+            
             
         log_prob = np.array([float(l) for l in results])
         
@@ -572,6 +656,269 @@ class Estimate(object):
            
         
         return log_likelihood
+    
+    
+    
+    
+class EstimateResults(object):
+    
+    
+    
+    def __init__(self, target=None, sampler=None, posterior=None, photometry=None, chains=None, options=None, stats=None):
+        
+        self._input = dict()
+        self._output = dict()
+        
+        self._input['target'] = target
+        self._input['options'] = options
+        
+        self._output['sampler'] = sampler
+        self._output['posterior'] = posterior
+        self._output['photometry'] = photometry
+        self._output['chains'] = chains
+        self._output['stats'] = stats
+        
+        
+        
+        
+    def __repr__(self):
+        
+        target = self.target
+        if isinstance(target, str):
+            target_repr = f"{target!r}"
+        elif isinstance(target, Target):
+            target_repr = f"<{target.__class__.__module__}.{target.__repr__()}>"
+        elif target is None:
+            target_repr = repr(target)
+            
+        sampler = self.sampler
+        if isinstance(sampler, emcee.EnsembleSampler):
+            sampler_repr = f"<{sampler.__class__.__module__}.{sampler.__class__.__name__}>"
+        elif sampler is None:
+            sampler_repr = f"{sampler!r}"
+            
+        posterior = self.posterior
+        if isinstance(posterior, pd.DataFrame):
+            posterior_repr = (f"<{posterior.__class__.__module__}.{posterior.__class__.__name__} "
+                              f"[{posterior.shape[0]} rows x {posterior.shape[1]} columns]>"
+                              )
+        elif posterior is None:
+            posterior_repr = f"{posterior!r}"
+            
+        photometry = self.photometry
+        if isinstance(photometry, pd.DataFrame):
+            photometry_repr = (f"<{photometry.__class__.__module__}.{photometry.__class__.__name__} "
+                              f"[{photometry.shape[0]} rows x {photometry.shape[1]} columns]>"
+                              )
+        elif photometry is None:
+            photometry_repr = f"{photometry!r}"
+            
+        chains = self.chains
+        if isinstance(chains, pd.DataFrame):
+            chains_repr = (f"<{chains.__class__.__module__}.{chains.__class__.__name__} "
+                              f"[{chains.shape[0]} rows x {chains.shape[1]} columns]>"
+                              )
+        elif chains is None:
+            chains_repr = f"{chains!r}"
+        
+        return (
+            f"{self.__class__.__name__}"
+            "("
+            f"target={target_repr}, "
+            f"sampler={sampler_repr}, "
+            f"posterior={posterior_repr}, "
+            f"photometry={photometry_repr}, "
+            f"chains={chains_repr}"
+            ")"
+            )
+    
+    
+    
+    
+    def __str__(self):
+        
+        target = self.target
+        if isinstance(target, str):
+            target_info = f"{target!r}"
+            prior_info = ''
+        elif isinstance(target, Target):
+            if target.coords is None:
+                target_info = f"{target.name!r}"
+            else:
+                target_info = f"{target.name!r} at [{target.coords.to_string(style='hmsdms')}]"
+            
+            prior_info = '\n - priors:'
+            priors = target.initial_conditions.prior.loc[target.name]
+            useful_priors = [(param, *priors.loc[param]) for param in priors.index if np.nan not in priors.loc[param]]
+            for tup in useful_priors:
+                prior_info = prior_info + f"\n   - {tup[0]}: {tup[1]} +/- {tup[2]}"
+            
+        elif target is None:
+            return "\nNo results"
+        
+        options = self.options
+        if options is None:
+            options_info = ''
+        else:
+            options_info = ''
+            for key in options:
+                if type(options[key]) is not dict:
+                    options_info = options_info + f"\n - {key}: {options[key]!r}"
+                else:
+                    options_info = options_info + f"\n - {key}:"
+                    for subkey in options[key]:
+                        options_info  = options_info + f"\n   - {subkey}: {options[key][subkey]!r}"
+                        
+        stats = self.stats
+        if stats is None:
+            stats_info = ''
+        else:
+            stats_info = '\n - stats:'
+            for key in stats:
+                stats_info = stats_info + f"\n   - {key}: {stats[key]!r}"
+                
+        photometry = self.photometry
+        if photometry is None or photometry is False:
+            bands_info = ''
+        else:
+            bands_info = f'\n - bands ({len(photometry.index)}):'
+            for band in photometry.index:
+                bands_info = bands_info + f"\n   - {band!r}"
+        
+        posterior = self.posterior
+        if posterior is None or posterior is False:
+            params_info = ''
+        else:
+            params_info = '\n - stellar parameters:'
+            for param in posterior.index:
+                params_info = params_info + f"\n   - {param}: {posterior.loc[param, 'max_probability']:.3g} +/- {posterior.loc[param, 'uncertainty']:.3g}"
+        
+            
+        
+        return (
+            f"\n{self.__class__.__name__} for {target_info}"
+            "\n\n"
+            "** Setup **"
+            f"\n{options_info}"
+            f"\n{prior_info}"
+            "\n\n"
+            "** Results **"
+            f"\n{stats_info}"
+            f"\n{bands_info}"
+            f"\n{params_info}"
+            "\n\n*****************************************************"
+            )
+    
+    
+    
+    
+    @property
+    def target(self):
+        
+        return self._input['target']
+    
+    
+    
+    
+    @property
+    def options(self):
+        
+        return self._input['options']
+    
+    
+    
+    
+    @property
+    def sampler(self):
+        
+        return self._output['sampler']
+    
+    
+    
+    
+    @property
+    def posterior(self):
+        
+        return self._output['posterior']
+    
+    
+    
+    
+    @property
+    def photometry(self):
+        
+        return self._output['photometry']
+    
+    
+    
+    
+    @property
+    def chains(self):
+        
+        return self._output['chains']
+    
+    
+    
+    
+    # alias of self.chains
+    @property
+    def posterior_chains(self):
+        
+        return self.chains
+    
+    
+    
+    
+    @property
+    def stats(self):
+        
+        return self._output['stats']
+    
+    
+    
+    
+    def add_kwarg(self, **kwargs):
+        
+        for kw in kwargs:
+            if kw in self._input.keys():
+                self._input[kw] = kwargs[kw]
+            elif kw in self._output.keys():
+                self._output[kw] = kwargs[kw]
+            else:
+                raise KeyError(
+                    f"{kw!r} not a valid keyword argument"
+                    )
+                
+    
+    
+    
+    
+    
+
+
+
+
+
+
+
+
+# if __name__ == '__main__':
+    
+#     res = EstimateResults(target=Target('hello', coords=(50, -50), unit='deg'), options=est.results.options)
+#     # res = EstimateResults(target=target, options=est.results.options)
+#     # res = EstimateResults()
+    
+#     print(res)
+
+
+
+
+
+
+
+
+
+
 
 
 

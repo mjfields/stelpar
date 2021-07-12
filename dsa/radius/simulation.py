@@ -85,6 +85,8 @@ class Probability(object):
         model, log_teff_prior = self._photometry_model(age, mass, Av, Teff_prior=Teff_prior, zero_extinction=self._zero_extinction)
         
         if model is False:
+            self.log_teff_prior = 0
+            
             return -np.inf
         
         self.log_teff_prior = log_teff_prior
@@ -219,10 +221,16 @@ class MCMC(object):
         The pool object used to parallelize the simulation. The default is `None`.
     zero_extinction : bool, optional
         If `True`, set extinction to zero (Av=0). The default is `False`.
+    walker_init_tol : int, optional
+        How many attempts should be made to initialize the walker positions
+        before the simulation starts? The deault is 1000.
+    walker_init_context : object, optional
+        Context manager within which the walkers are initialized. Will either
+        be this library's `WaitingAnimation` or `contextlib.nullcontext`.
     
     """
     
-    def __init__(self, nwalkers, nsteps, log_probability_func, initial_conditions=None, moves=None, pool=None, zero_extinction=False):
+    def __init__(self, nwalkers, nsteps, log_probability_func, initial_conditions=None, moves=None, pool=None, zero_extinction=False, walker_init_tol=1000, walker_init_context=None):
         
         self.nwalkers = nwalkers
         self.nsteps = nsteps
@@ -244,6 +252,10 @@ class MCMC(object):
             self.moves = Moves().moves.copy()
             
         self._zero_extinction = zero_extinction
+        
+        self._walker_init_tol = walker_init_tol
+        
+        self._walker_init_context = walker_init_context
         
         if self._zero_extinction:
             self.ndim = 3
@@ -280,7 +292,7 @@ class MCMC(object):
             if np.isfinite(log_prob(p)):
                 pos.append(p)
                 
-            if i > 1000:
+            if i > self._walker_init_tol:
                 print("Failed to initialize walkers. Try changing the intial conditions.")
                 
                 return False
@@ -301,7 +313,9 @@ class MCMC(object):
 
         """
         
-        pos = self._get_pos()
+        with self._walker_init_context:
+            pos = self._get_pos()
+            print('')
         
         if pos is False:
             
