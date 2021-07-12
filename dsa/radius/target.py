@@ -54,6 +54,19 @@ class Target(object):
         self._ic = InitialConditions()
         self._moves = Moves()
         self._phot_meta = PhotometryMetadata()
+        
+        
+        
+        
+    def __repr__(self):
+        
+        return (
+            f"{self.__class__.__name__}"
+            "("
+            f"name={self.name!r}, "
+            f"coords={self.coords!r}"
+            ")"
+            )
     
     
     

@@ -806,7 +806,8 @@ class EstimateResults(object):
             f"\n{stats_info}"
             f"\n{bands_info}"
             f"\n{params_info}"
-            "\n\n*****************************************************"
+            "\n\n"
+            "*****************************************************"
             )
     
     
@@ -888,7 +889,7 @@ class EstimateResults(object):
                 raise KeyError(
                     f"{kw!r} not a valid keyword argument"
                     )
-                
+
 
 
 
