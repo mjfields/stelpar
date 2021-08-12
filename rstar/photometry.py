@@ -653,7 +653,7 @@ class MeasuredPhotometry(object):
         
         
         # Luri et al. 2018 suggest a full Bayesian approach for dealing with negitive parallaxes
-        # I'm ignoring this and cutting them out b/c I can't be bothered right now
+        # I'm ignoring this and cutting them out
         if parallax < 0 or parallax_error < 0:
             term_message = f"Failed for {self.name}: parallax or error is negative. Ignoring Luri+2018 and removing the target."
             
