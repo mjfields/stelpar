@@ -554,7 +554,7 @@ class MeasuredPhotometry(object):
             
             meta = self._photometry_meta
             
-            plx_mas, plxe_mas = np.nan, np.nan
+            plx_mas, plxe_mas, ruwe = np.nan, np.nan, np.nan
             
             for catalog in self._catalogs:
                 
@@ -573,6 +573,7 @@ class MeasuredPhotometry(object):
                     if 'gaia' in catalog.lower():
                         
                         plx_mas, plxe_mas = table['Plx'], table['e_Plx']
+                        ruwe = table['RUWE']
                         
                         
                 if catalog.lower() == 'local':
@@ -653,7 +654,7 @@ class MeasuredPhotometry(object):
         
         
         # Luri et al. 2018 suggest a full Bayesian approach for dealing with negitive parallaxes
-        # I'm ignoring this and cutting them out
+        # I'm ignoring this and cutting them out b/c I can't be bothered right now
         if parallax < 0 or parallax_error < 0:
             term_message = f"Failed for {self.name}: parallax or error is negative. Ignoring Luri+2018 and removing the target."
             
@@ -667,8 +668,9 @@ class MeasuredPhotometry(object):
         photometry['parallax'] = parallax
         photometry['parallax_error'] = parallax_error
         
-        
         photometry = photometry.dropna()
+        
+        photometry['RUWE'] = ruwe
         
         
         term_message = f"Success for {self.name}: photometry found."
@@ -687,8 +689,23 @@ class MeasuredPhotometry(object):
             photometry.loc[band, ['flux', 'flux_error']] = mag_to_flux(*photometry.loc[band, ['apparent_magnitude', 'zeropoint_flux', 'apparent_magnitude_error']])
         
         
+        
         # put 'system' and 'isochrone_analog' columns last
-        photometry = photometry[['apparent_magnitude', 'apparent_magnitude_error', 'ABSOLUTE_MAGNITUDE', 'ABSOLUTE_MAGNITUDE_ERROR', 'flux', 'flux_error', 'parallax', 'parallax_error', 'zeropoint_flux', 'wavelength', 'system', 'isochrone_analog']]
+        photometry = photometry[[
+            'apparent_magnitude',
+            'apparent_magnitude_error',
+            'ABSOLUTE_MAGNITUDE',
+            'ABSOLUTE_MAGNITUDE_ERROR',
+            'flux',
+            'flux_error',
+            'parallax',
+            'parallax_error',
+            'RUWE',
+            'zeropoint_flux',
+            'wavelength',
+            'system',
+            'isochrone_analog'
+            ]]
                 
         
         return photometry, term_message
