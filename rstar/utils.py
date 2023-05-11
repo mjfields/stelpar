@@ -227,13 +227,13 @@ def plot_labels(zero_extinction=False):
     
     df = pd.DataFrame(index=params)
     
-    df.loc['age', ['label', 'fancy_label', 'fancy_label_unitless']] = 'age (Myr)', '$\\tau_{\\star} \, \mathrm{(Myr)}$', '$\\tau_{\\star}$'
-    df.loc['mass', ['label', 'fancy_label', 'fancy_label_unitless']] = 'mass (M_Sun)', '$M_{\\star} \, (\mathrm{M}_{\\odot})$', '$M_{\\star}$'
+    df.loc['age', ['label', 'fancy_label', 'fancy_label_unitless']] = 'age (Myr)', '$\\tau_{\mathsf{\\star}} \, \mathrm{(Myr)}$', '$\\tau_{\mathsf{\\star}}$'
+    df.loc['mass', ['label', 'fancy_label', 'fancy_label_unitless']] = 'mass (M_Sun)', '$M_{\mathsf{\\star}} \, (\mathrm{M}_{\\odot})$', '$M_{\mathsf{\\star}}$'
     df.loc['Av', ['label', 'fancy_label', 'fancy_label_unitless']] = 'Av [mag]', '$A_V \ \mathrm{[mag]}$', '$A_V$'
     df.loc['f', ['label', 'fancy_label', 'fancy_label_unitless']] = 'f [mag]', '$f \ \mathrm{[mag]}$', '$f$'
-    df.loc['radius', ['label', 'fancy_label', 'fancy_label_unitless']] = 'radius (R_Sun)', '$R_{\\star} \, (\mathrm{R}_{\\odot})$', '$R_{\\star}$'
-    df.loc['Teff', ['label', 'fancy_label', 'fancy_label_unitless']] = 'Teff (K)', '$T_{eff} \, \mathrm{(K)}$', '$T_{eff}$'
-    df.loc['density', ['label', 'fancy_label', 'fancy_label_unitless']] = 'density (M_Sun/R_Sun^3)', '$\\rho_{\\star} \, (\mathrm{M}_{\\odot}/{R_{\\odot}}^3)$', '$\\rho_{\\star}$)'
+    df.loc['radius', ['label', 'fancy_label', 'fancy_label_unitless']] = 'radius (R_Sun)', '$R_{\mathsf{\\star}} \, (\mathrm{R}_{\\odot})$', '$R_{\mathsf{\\star}}$'
+    df.loc['Teff', ['label', 'fancy_label', 'fancy_label_unitless']] = 'Teff (K)', '$T_{\mathrm{eff}} \, \mathrm{(K)}$', '$T_{\mathrm{eff}}$'
+    df.loc['density', ['label', 'fancy_label', 'fancy_label_unitless']] = 'density (M_Sun/R_Sun^3)', '$\\rho_{\mathsf{\\star}} \, (\mathrm{M}_{\\odot}/{R_{\\odot}}^3)$', '$\\rho_{\mathsf{\\star}}$)'
     
     if zero_extinction:
         df.drop(index='Av', inplace=True)
