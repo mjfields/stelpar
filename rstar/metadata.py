@@ -277,9 +277,9 @@ class PhotometryMetadata(object):
                     ('II/246/out', '2mass_hmag'),
                     ('II/246/out', '2mass_kmag'),
                     
-                    ('I/350/gaiaedr3', 'gaia_gmag'),
-                    ('I/350/gaiaedr3', 'gaia_bpmag'),
-                    ('I/350/gaiaedr3', 'gaia_rpmag'),
+                    ('I/350/gaiadr3', 'gaia_gmag'),
+                    ('I/350/gaiadr3', 'gaia_bpmag'),
+                    ('I/350/gaiadr3', 'gaia_rpmag'),
                     
                     ('V/147/sdss12', 'sdss_gmag'),
                     ('V/147/sdss12', 'sdss_rmag'),
@@ -309,9 +309,9 @@ class PhotometryMetadata(object):
         self._default_photometry.loc[('II/246/out', '2mass_hmag'), ('magnitude', 'error', 'system', 'isochrone_analog')] = 'Hmag', 'e_Hmag', 'VEGA', '2mass_hmag'
         self._default_photometry.loc[('II/246/out', '2mass_kmag'), ('magnitude', 'error', 'system', 'isochrone_analog')] = 'Kmag', 'e_Kmag', 'VEGA', '2mass_kmag'
         
-        self._default_photometry.loc[('I/350/gaiaedr3', 'gaia_gmag'), ('magnitude', 'error', 'system', 'isochrone_analog')] = 'Gmag', 'e_Gmag', 'VEGA', 'gaia_gmag'
-        self._default_photometry.loc[('I/350/gaiaedr3', 'gaia_bpmag'), ('magnitude', 'error', 'system', 'isochrone_analog')] = 'BPmag', 'e_BPmag', 'VEGA', 'gaia_bpmag'
-        self._default_photometry.loc[('I/350/gaiaedr3', 'gaia_rpmag'), ('magnitude', 'error', 'system', 'isochrone_analog')] = 'RPmag', 'e_RPmag', 'VEGA', 'gaia_rpmag'
+        self._default_photometry.loc[('I/350/gaiadr3', 'gaia_gmag'), ('magnitude', 'error', 'system', 'isochrone_analog')] = 'Gmag', 'e_Gmag', 'VEGA', 'gaia_gmag'
+        self._default_photometry.loc[('I/350/gaiadr3', 'gaia_bpmag'), ('magnitude', 'error', 'system', 'isochrone_analog')] = 'BPmag', 'e_BPmag', 'VEGA', 'gaia_bpmag'
+        self._default_photometry.loc[('I/350/gaiadr3', 'gaia_rpmag'), ('magnitude', 'error', 'system', 'isochrone_analog')] = 'RPmag', 'e_RPmag', 'VEGA', 'gaia_rpmag'
         
         self._default_photometry.loc[('V/147/sdss12', 'sdss_gmag'), ('magnitude', 'error', 'system', 'isochrone_analog')] = 'gmag', 'e_gmag', 'AB', 'sdss_gmag'
         self._default_photometry.loc[('V/147/sdss12', 'sdss_rmag'), ('magnitude', 'error', 'system', 'isochrone_analog')] = 'rmag', 'e_rmag', 'AB', 'sdss_rmag'
@@ -571,6 +571,12 @@ class MetaDataFrame(pd.DataFrame):
                 'format' : '.5e',
                 'unit' : 'arcsec',
                 'description' : 'measured parallax uncertainty'
+                },
+            'RUWE' : {
+                'dtype' : 'float64',
+                'format' : '.5e',
+                'unit' : '',
+                'description' : 'renormalized unit weight error'
                 },
             'zeropoint_flux' : {
                 'dtype' : 'float64',
