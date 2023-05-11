@@ -14,31 +14,36 @@ from .utils import plot_labels, frac_res, frac_res_error, residual, sigma
 
 
 
-plt.rcParams['font.family'] = 'serif'
+plt.style.use('default')
+
+plt.rcParams['font.family'] = 'stixgeneral'
 plt.rcParams['font.weight'] = 'demi'
 
-plt.rcParams['mathtext.bf'] = 'serif:demi'
-plt.rcParams['mathtext.rm'] = 'serif:demi'
+plt.rcParams['mathtext.fontset'] = 'custom'
+plt.rcParams['mathtext.bf'] = 'stixgeneral:demi'
+plt.rcParams['mathtext.rm'] = 'stixgeneral:demi'
+plt.rcParams['mathtext.it'] = 'stixgeneral:demi:italic'
+plt.rcParams['mathtext.sf'] = 'sans:demi' # used for stubborn symbols e.g. \star
 
-plt.rcParams['lines.linewidth'] = 3
+plt.rcParams['lines.linewidth'] = 4
 
-plt.rcParams['axes.linewidth'] = 3
+plt.rcParams['axes.linewidth'] = 4
 plt.rcParams['axes.labelweight'] = 'demi'
-plt.rcParams['axes.labelpad'] = 20.0
-plt.rcParams['axes.labelsize'] = 13 
+plt.rcParams['axes.labelpad'] = 10.0
+plt.rcParams['axes.labelsize'] = 24
 plt.rcParams['axes.titlesize'] = 13
 plt.rcParams['axes.formatter.limits'] = [-4, 4]
 plt.rcParams['axes.edgecolor'] = 'black'
  
-plt.rcParams['xtick.labelsize'] = 12
-plt.rcParams['xtick.major.size'] = 7
-plt.rcParams['xtick.major.width'] = 2.5
+plt.rcParams['xtick.labelsize'] = 22
+plt.rcParams['xtick.major.size'] = 8
+plt.rcParams['xtick.major.width'] = 3
 
-plt.rcParams['ytick.labelsize'] = 12
-plt.rcParams['ytick.major.size'] = 7
-plt.rcParams['ytick.major.width'] = 2.5
+plt.rcParams['ytick.labelsize'] = 22
+plt.rcParams['ytick.major.size'] = 8
+plt.rcParams['ytick.major.width'] = 3
 
-plt.rcParams['legend.fontsize'] = 11
+plt.rcParams['legend.fontsize'] = 22
 plt.rcParams['legend.frameon'] = True
 plt.rcParams['legend.edgecolor'] = 'black'
 plt.rcParams['legend.numpoints'] = 1
@@ -170,9 +175,9 @@ def corner_plot(chain, bins=20, r=None, corner_kwargs=None, savefile=None, show=
                 
             # labelpad doesn't work so doing it manually
             if j == 0:
-                ax.yaxis.set_label_coords(-0.35, 0.5)
+                ax.yaxis.set_label_coords(-0.45, 0.5)
             if i == ndim-1:
-                ax.xaxis.set_label_coords(0.5, -0.35)
+                ax.xaxis.set_label_coords(0.5, -0.45)
                 
     fig.subplots_adjust(hspace=0.1, wspace=0.1)
     
@@ -234,23 +239,25 @@ def flux_v_wavelength(photometry, title=None, singlefig=True, savefile=None, sho
     max_frac_error = frac_res_error(obs_flux, obs_flux_error, max_flux, max_flux_error)
     
     
-    mkrsize = 7
+    mkrsize = 10
     mkredgewidth = 2.5
-    elinewidth = 2
-    capsize=7
-    capthick=2.0
-    alpha = 1.0
+    elinewidth = 2.5
+    # capsize=7
+    # capthick=2.0
+    alpha = 1
     ylabel_coords = (-0.085, 0.5)
     
     wav_label = '$\mathbf{\\lambda} \\ \\left( \mathbf{\\mu}\mathrm{m} \\right)$'
     flux_label = '$\mathbf{F_{\\lambda}} \\ \\left( \mathrm{erg} \\ \mathrm{cm}\mathbf{^{-2}} \\ \mathrm{s}\mathbf{^{-1}} \\ \\AA\mathbf{^{-1}} \\right)$'
     
     obs_color = 'black'
-    med_color = (0.35, 0.55, 0.35)
-    max_color = '#2de37f'
+    med_color = 'mediumblue' # (0.35, 0.55, 0.35)
+    max_color = 'green' # '#2de37f'
     
     med_res_color = med_color
     max_res_color = max_color
+    
+    fill = 'white'
     
     hcolor = 'black'
     hstyle = '--'
@@ -259,7 +266,7 @@ def flux_v_wavelength(photometry, title=None, singlefig=True, savefile=None, sho
     
     if singlefig:
     
-        fig, (ax1, ax2) = plt.subplots(nrows=2, ncols=1, sharex=False, gridspec_kw={'height_ratios':[3,1]}, figsize=(10,8))
+        fig, (ax1, ax2) = plt.subplots(nrows=2, ncols=1, sharex=False, gridspec_kw={'height_ratios':[3,1]}, figsize=(12,8))
         
         ax1.errorbar(
             wav, 
@@ -283,11 +290,12 @@ def flux_v_wavelength(photometry, title=None, singlefig=True, savefile=None, sho
             fmt='s',
             markersize=mkrsize,
             markeredgecolor=med_color, 
-            markerfacecolor='None',
+            markerfacecolor=fill,
             markeredgewidth=mkredgewidth,
             ecolor=med_color,
             elinewidth=elinewidth,
             label='Median',
+            alpha=alpha,
             zorder=2
             )
         
@@ -295,14 +303,15 @@ def flux_v_wavelength(photometry, title=None, singlefig=True, savefile=None, sho
             wav, 
             max_flux, 
             yerr=max_flux_error,
-            fmt='D',
+            fmt='^',
             markersize=mkrsize,
             markeredgecolor=max_color, 
-            markerfacecolor='None',
+            markerfacecolor=fill,
             markeredgewidth=mkredgewidth,
             ecolor=max_color,
             elinewidth=elinewidth,
             label='Max-Likelihood',
+            alpha=alpha,
             zorder=3
             )
         
@@ -326,7 +335,7 @@ def flux_v_wavelength(photometry, title=None, singlefig=True, savefile=None, sho
             fmt='s', 
             markersize=mkrsize, 
             markeredgecolor=med_res_color, 
-            markerfacecolor='None', 
+            markerfacecolor=fill, 
             markeredgewidth=mkredgewidth,
             ecolor=med_res_color,
             elinewidth=elinewidth,
@@ -339,10 +348,10 @@ def flux_v_wavelength(photometry, title=None, singlefig=True, savefile=None, sho
             wav, 
             max_frac_res, 
             yerr=max_frac_error, 
-            fmt='D', 
+            fmt='^', 
             markersize=mkrsize, 
             markeredgecolor=max_res_color, 
-            markerfacecolor='None', 
+            markerfacecolor=fill, 
             markeredgewidth=mkredgewidth,
             ecolor=max_res_color,
             elinewidth=elinewidth,
@@ -360,7 +369,7 @@ def flux_v_wavelength(photometry, title=None, singlefig=True, savefile=None, sho
         
     else:
         
-        fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(nrows=2, ncols=2, sharex=False, gridspec_kw={'height_ratios':[3,1]}, figsize=(22,8))
+        fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(nrows=2, ncols=2, sharex=False, gridspec_kw={'height_ratios':[3,1]}, figsize=(24,8))
         
         ax1.errorbar(
             wav, 
@@ -384,7 +393,7 @@ def flux_v_wavelength(photometry, title=None, singlefig=True, savefile=None, sho
             fmt='s',
             markersize=mkrsize,
             markeredgecolor=med_color, 
-            markerfacecolor='None',
+            markerfacecolor=fill,
             markeredgewidth=mkredgewidth,
             ecolor=med_color,
             elinewidth=elinewidth,
@@ -414,7 +423,7 @@ def flux_v_wavelength(photometry, title=None, singlefig=True, savefile=None, sho
             fmt='s', 
             markersize=mkrsize, 
             markeredgecolor=med_res_color, 
-            markerfacecolor='None', 
+            markerfacecolor=fill, 
             markeredgewidth=mkredgewidth,
             ecolor=med_res_color,
             elinewidth=elinewidth,
@@ -449,10 +458,10 @@ def flux_v_wavelength(photometry, title=None, singlefig=True, savefile=None, sho
             wav, 
             max_flux, 
             yerr=max_flux_error,
-            fmt='D',
+            fmt='^',
             markersize=mkrsize,
             markeredgecolor=max_color, 
-            markerfacecolor='None',
+            markerfacecolor=fill,
             markeredgewidth=mkredgewidth,
             ecolor=max_color,
             elinewidth=elinewidth,
@@ -480,10 +489,10 @@ def flux_v_wavelength(photometry, title=None, singlefig=True, savefile=None, sho
             wav, 
             max_frac_res, 
             yerr=max_frac_error, 
-            fmt='D', 
+            fmt='^', 
             markersize=mkrsize, 
             markeredgecolor=max_res_color, 
-            markerfacecolor='None', 
+            markerfacecolor=fill, 
             markeredgewidth=mkredgewidth,
             ecolor=max_res_color,
             elinewidth=elinewidth,
