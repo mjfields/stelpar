@@ -277,20 +277,22 @@ class PhotometryMetadata(object):
                     ('II/246/out', '2mass_hmag'),
                     ('II/246/out', '2mass_kmag'),
                     
-                    ('I/350/gaiadr3', 'gaia_gmag'),
-                    ('I/350/gaiadr3', 'gaia_bpmag'),
-                    ('I/350/gaiadr3', 'gaia_rpmag'),
+                    ('I/355/gaiadr3', 'gaia_gmag'),
+                    ('I/355/gaiadr3', 'gaia_bpmag'),
+                    ('I/355/gaiadr3', 'gaia_rpmag'),
                     
-                    ('V/147/sdss12', 'sdss_gmag'),
-                    ('V/147/sdss12', 'sdss_rmag'),
-                    ('V/147/sdss12', 'sdss_imag'),
-                    ('V/147/sdss12', 'sdss_zmag'),
+                    ('V/154/sdss16', 'sdss_gmag'),
+                    ('V/154/sdss16', 'sdss_rmag'),
+                    ('V/154/sdss16', 'sdss_imag'),
+                    ('V/154/sdss16', 'sdss_zmag'),
                     
                     ('II/336/apass9', 'johnson_bmag'),
                     ('II/336/apass9', 'johnson_vmag'),
                     
                     ('I/259/tyc2', 'tycho_bmag'),
                     ('I/259/tyc2', 'tycho_vmag'),
+                    
+                    ('I/239/hip_main', 'hipparcos_hpmag'),
                     ],
                 names=[
                     'catalog',
@@ -309,20 +311,22 @@ class PhotometryMetadata(object):
         self._default_photometry.loc[('II/246/out', '2mass_hmag'), ('magnitude', 'error', 'system', 'isochrone_analog')] = 'Hmag', 'e_Hmag', 'VEGA', '2mass_hmag'
         self._default_photometry.loc[('II/246/out', '2mass_kmag'), ('magnitude', 'error', 'system', 'isochrone_analog')] = 'Kmag', 'e_Kmag', 'VEGA', '2mass_kmag'
         
-        self._default_photometry.loc[('I/350/gaiadr3', 'gaia_gmag'), ('magnitude', 'error', 'system', 'isochrone_analog')] = 'Gmag', 'e_Gmag', 'VEGA', 'gaia_gmag'
-        self._default_photometry.loc[('I/350/gaiadr3', 'gaia_bpmag'), ('magnitude', 'error', 'system', 'isochrone_analog')] = 'BPmag', 'e_BPmag', 'VEGA', 'gaia_bpmag'
-        self._default_photometry.loc[('I/350/gaiadr3', 'gaia_rpmag'), ('magnitude', 'error', 'system', 'isochrone_analog')] = 'RPmag', 'e_RPmag', 'VEGA', 'gaia_rpmag'
+        self._default_photometry.loc[('I/355/gaiadr3', 'gaia_gmag'), ('magnitude', 'error', 'system', 'isochrone_analog')] = 'Gmag', 'e_Gmag', 'VEGA', 'gaia_gmag'
+        self._default_photometry.loc[('I/355/gaiadr3', 'gaia_bpmag'), ('magnitude', 'error', 'system', 'isochrone_analog')] = 'BPmag', 'e_BPmag', 'VEGA', 'gaia_bpmag'
+        self._default_photometry.loc[('I/355/gaiadr3', 'gaia_rpmag'), ('magnitude', 'error', 'system', 'isochrone_analog')] = 'RPmag', 'e_RPmag', 'VEGA', 'gaia_rpmag'
         
-        self._default_photometry.loc[('V/147/sdss12', 'sdss_gmag'), ('magnitude', 'error', 'system', 'isochrone_analog')] = 'gmag', 'e_gmag', 'AB', 'sdss_gmag'
-        self._default_photometry.loc[('V/147/sdss12', 'sdss_rmag'), ('magnitude', 'error', 'system', 'isochrone_analog')] = 'rmag', 'e_rmag', 'AB', 'sdss_rmag'
-        self._default_photometry.loc[('V/147/sdss12', 'sdss_imag'), ('magnitude', 'error', 'system', 'isochrone_analog')] = 'imag', 'e_imag', 'AB', 'sdss_imag'
-        self._default_photometry.loc[('V/147/sdss12', 'sdss_zmag'), ('magnitude', 'error', 'system', 'isochrone_analog')] = 'zmag', 'e_zmag', 'AB', 'sdss_zmag'
+        self._default_photometry.loc[('V/154/sdss16', 'sdss_gmag'), ('magnitude', 'error', 'system', 'isochrone_analog')] = 'gmag', 'e_gmag', 'AB', 'sdss_gmag'
+        self._default_photometry.loc[('V/154/sdss16', 'sdss_rmag'), ('magnitude', 'error', 'system', 'isochrone_analog')] = 'rmag', 'e_rmag', 'AB', 'sdss_rmag'
+        self._default_photometry.loc[('V/154/sdss16', 'sdss_imag'), ('magnitude', 'error', 'system', 'isochrone_analog')] = 'imag', 'e_imag', 'AB', 'sdss_imag'
+        self._default_photometry.loc[('V/154/sdss16', 'sdss_zmag'), ('magnitude', 'error', 'system', 'isochrone_analog')] = 'zmag', 'e_zmag', 'AB', 'sdss_zmag'
         
         self._default_photometry.loc[('II/336/apass9', 'johnson_bmag'), ('magnitude', 'error', 'system', 'isochrone_analog')] = 'Bmag', 'e_Bmag', 'VEGA', 'johnson_bmag'
         self._default_photometry.loc[('II/336/apass9', 'johnson_vmag'), ('magnitude', 'error', 'system', 'isochrone_analog')] = 'Vmag', 'e_Vmag', 'VEGA', 'johnson_vmag'
         
         self._default_photometry.loc[('I/259/tyc2', 'tycho_bmag'), ('magnitude', 'error', 'system', 'isochrone_analog')] = 'BTmag', 'e_BTmag', 'VEGA', 'tycho_bmag'
         self._default_photometry.loc[('I/259/tyc2', 'tycho_vmag'), ('magnitude', 'error', 'system', 'isochrone_analog')] = 'VTmag', 'e_VTmag', 'VEGA', 'tycho_vmag'
+        
+        self._default_photometry.loc[('I/239/hip_main', 'hipparcos_hpmag'), ('magnitude', 'error', 'system', 'isochrone_analog')] = 'Hpmag', 'e_Hpmag', 'VEGA', 'hipparcos_hpmag'
         
         
         self._photometry = self._default_photometry.copy()
