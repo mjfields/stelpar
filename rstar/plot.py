@@ -7,9 +7,17 @@
 import numpy as np
 
 import matplotlib.pyplot as plt
+import matplotlib.ticker as ticker
 import corner
 
-from .utils import plot_labels, frac_res, frac_res_error, residual, sigma
+from .utils import (
+    plot_labels,
+    phot_plot_labels,
+    frac_res,
+    frac_res_error,
+    residual,
+    sigma
+    )
 
 
 
@@ -34,6 +42,8 @@ plt.rcParams['axes.labelsize'] = 24
 plt.rcParams['axes.titlesize'] = 13
 plt.rcParams['axes.formatter.limits'] = [-4, 4]
 plt.rcParams['axes.edgecolor'] = 'black'
+plt.rcParams['axes.titlesize'] = 24
+plt.rcParams['axes.titleweight'] = 'demi'
  
 plt.rcParams['xtick.labelsize'] = 22
 plt.rcParams['xtick.major.size'] = 8
@@ -52,6 +62,8 @@ plt.rcParams['legend.loc'] = 'best'
 
 plt.rcParams['figure.figsize'] = (10, 8)
 plt.rcParams['figure.titleweight'] = 'demi'
+plt.rcParams['figure.titlesize'] = 30
+plt.rcParams['figure.dpi'] = 300
 
 plt.rcParams['savefig.bbox'] = 'tight'
 
@@ -690,6 +702,83 @@ def mag_v_wavelength(photometry, savefile=None, show=True):
     if savefile is not None:
         fig.savefig(savefile)
         
+    if not show:
+        plt.close(fig)
+    
+    
+    return fig
+
+
+
+
+def mag_v_wavelength_eyecheck(photometry, name=None, savefile=None, show=True):
+    
+    """
+    Creates a plot of absolute magnitude vs. wavelength.
+    
+    Parameters
+    ----------
+    photometry : DataFrame
+        The measured and estimated magnitudes and other photometric data.
+    savefile : str, optional
+        The file location to save the figure. If `None` (default), will not save the figure.
+    show : bool, optional
+        If `True` (default), displays the figure.
+        
+    Returns
+    -------
+    fig : Figure
+        `matplotlib.figure.Figure` object which contains the plot elements.
+    
+    """ 
+    
+    wav = photometry['wavelength'].divide(1e4) # microns
+    
+    obs_mag = photometry['apparent_magnitude']
+    obs_mag_error = photometry['apparent_magnitude_error']
+    
+    labels = [phot_plot_labels()[band] for band in photometry.index]
+    
+    
+    fig, ax = plt.subplots(figsize=(8, 6))
+        
+    ax.errorbar(
+        wav, 
+        obs_mag, 
+        yerr=obs_mag_error, 
+        marker='o', 
+        linestyle='',
+        markersize=12, 
+        markerfacecolor='lightblue', 
+        markeredgecolor='black', 
+        markeredgewidth=1.5, 
+        ecolor='black',
+        elinewidth=1.5,
+        )
+    
+    ax.set_xlabel("$\lambda$ ($\mu$m)")
+    ax.set_ylabel("$m$ [mag]")
+    
+    ylim = ax.get_ylim()
+    
+    xoffset = 0
+    yoffset = -0.05 * (ylim[1] - ylim[0])
+    
+    for w, m, l in zip(wav, obs_mag, labels):
+        plt.text(w+xoffset, m+yoffset, l)
+        
+    ax.set_ylim(ylim[0]+yoffset, ylim[1])
+    
+    
+    ax.xaxis.set_major_locator(ticker.MultipleLocator(0.25))
+    
+    if name is not None:
+        ax.set_title(name)
+    
+    
+    if savefile is not None:
+        fig.savefig(savefile)
+    
     if not show:
         plt.close(fig)
     
