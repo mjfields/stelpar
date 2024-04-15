@@ -243,6 +243,38 @@ def plot_labels(zero_extinction=False):
 
 
 
+def phot_plot_labels():
+    
+    return {
+        '2mass_jmag' : 'J',
+        '2mass_hmag' : 'H',
+        '2mass_kmag' : 'K$_s$',
+        'gaia_gmag' : 'G',
+        'gaia_bpmag' : 'G$_{BP}$',
+        'gaia_rpmag' : 'G$_{RP}$',
+        'sdss_gmag' : 'g${\prime}$',
+        'sdss_rmag' : 'r${\prime}$',
+        'sdss_imag' : 'i${\prime}$',
+        'sdss_zmag' : 'z${\prime}$',
+        'johnson_bmag' : 'B',
+        'johnson_vmag' : 'V',
+        'cousins_rmag' : 'R',
+        'cousins_imag' : 'I',
+        'tycho_bmag' : 'B$_T$',
+        'tycho_vmag' : 'V$_T$',
+        'hipparcos_hpmag' : 'H$_P$',
+        'ps1_gmag' : 'g',
+        'ps1_rmag' : 'r',
+        'ps1_imag' : 'i',
+        'ps1_zmag' : 'z',
+        'ps1_ymag' : 'y',
+        'ps1_omag' : 'o',
+        'ps1_wmag' : 'w',
+        }
+
+
+
+
 # calculate the standard deviation of the residual
 def residualSE(x, x_meas, N, ndim):
     
