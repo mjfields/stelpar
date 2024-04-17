@@ -81,7 +81,7 @@ class MeasuredPhotometry(object):
         
     """
     
-    def __init__(self, name, coords=None, photometry_meta=None, search_radius=5*u.arcsec, radius_step=1*u.arcsec, tol=0, lazy_tol=True, vizier_kwargs=None, validate=False, isochrone_cols=None):
+    def __init__(self, name, coords=None, photometry_meta=None, search_radius=5*u.arcsec, radius_step=1*u.arcsec, tol=0, lazy_tol=False, vizier_kwargs=None, validate=False, isochrone_cols=None):
         
         self.name = name
         self.coords = coords
@@ -442,7 +442,8 @@ class MeasuredPhotometry(object):
             return False, termination_message
         
         
-        table_lengths = [len(query[table_name]) for table_name in query.keys()]
+        table_lengths = [len(query[table_name][query[table_name]['mode']==1]) if 'sdss' in table_name else len(query[table_name]) for table_name in query.keys()]
+                
         
         ncatalogs = len(table_lengths)
         
@@ -476,7 +477,9 @@ class MeasuredPhotometry(object):
                         
                         return False, termination_message
                     
-                    table_lengths = [len(new_query[table_name]) for table_name in new_query.keys()]
+                    
+                    # in SDSS DR16, `mode=1` indicates a primary image
+                    table_lengths = [len(new_query[table_name][new_query[table_name]['mode']==1]) if 'sdss' in table_name else len(new_query[table_name]) for table_name in new_query.keys()]
                     
                     
                     if np.mean(table_lengths) > 1:
@@ -491,8 +494,7 @@ class MeasuredPhotometry(object):
             if 1 in table_lengths:
                 ctlg = np.array(query.keys())[np.where(np.array(table_lengths) == 1)]
                 
-                query_results.update({c : query[c] for c in ctlg.tolist()})
-                
+                query_results.update({c : (query[c][query[c]['mode']==1] if 'sdss' in c else query[c]) for c in ctlg.tolist()})
             
             if np.mean(table_lengths) > 1:
             
@@ -528,13 +530,13 @@ class MeasuredPhotometry(object):
                             query = query_results
                             break
                     
-                    table_lengths = [len(new_query[table_name]) for table_name in new_query.keys()]
+                    table_lengths = [len(new_query[table_name][new_query[table_name]['mode']==1]) if 'sdss' in table_name else len(new_query[table_name]) for table_name in new_query.keys()]
                     
                     
                     if 1 in table_lengths:
                         ctlg = np.array(new_query.keys())[np.where(np.array(table_lengths) == 1)]
                         
-                        query_results.update({c : new_query[c] for c in ctlg.tolist()})
+                        query_results.update({c : (new_query[c][new_query[c]['mode']==1] if 'sdss' in c else new_query[c]) for c in ctlg.tolist()})
                         
                     
                     if len(query_results.keys()) == ncatalogs:
@@ -560,7 +562,10 @@ class MeasuredPhotometry(object):
                 
                 if catalog in list(query.keys()):
                     
-                    table = query[catalog]
+                    if 'sdss' in catalog.lower():
+                        table = query[catalog][query[catalog]['mode']==1]
+                    else:
+                        table = query[catalog]
                     
                     for band in meta.loc[catalog].index:
                         
@@ -573,7 +578,7 @@ class MeasuredPhotometry(object):
                     if 'gaia' in catalog.lower():
                         
                         plx_mas, plxe_mas = table['Plx'], table['e_Plx']
-                        ruwe = table['RUWE']
+                        ruwe = table['RUWE'][0]
                         
                         
                 if catalog.lower() == 'local':
