@@ -1,3 +1,3 @@
-# rstar
+# stelpar
 
-A Python-based pipeline and analysis tool for estimating stellar radii and other stellar parameters including age, mass, effective temperature, and density.
+A Python-based pipeline and analysis tool for estimating stellar parameters (particularly for young stars) including age, mass, radius, effective temperature, density, and others. The code works by downloading observed photometry and comparing to a stellar evolutionary model. 
