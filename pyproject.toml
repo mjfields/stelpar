@@ -1,0 +1,40 @@
+[build-system]
+requires = ["setuptools>=40.8.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "stelpar"
+version = "0.1.0"
+authors = [
+    {name = "Matthew J. Fields", email = "mjfields@live.unc.edu"},
+]
+description = "Stellar parameter estimation and analysis tool"
+requires-python = ">=3.6"
+keywords = ["astronomy", "astrophysics"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+dependencies = [
+    "numpy", 
+    "numba",
+    "pandas",
+    "emcee>=3.0.0",
+    "astroquery",
+    "synphot",
+    "dust_extinction",
+    "isochrones",
+    "tqdm",
+    "matplotlib",
+    "corner",
+    "setuptools"
+]
+dynamic = ["readme"]
+
+[tool.setuptools.dynamic]
+readme = {file = ["README.md"]}
+
+[tool.setuptools]
+packages = ["stelpar"]
+package-dir = {"" = "src"}

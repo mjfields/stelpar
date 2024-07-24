@@ -1,8 +1,4 @@
-#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-
-
-
 
 from .photometry import MeasuredPhotometry, SyntheticPhotometry
 from .simulation import Probability, MCMC
