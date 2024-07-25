@@ -60,7 +60,7 @@ class Estimate(object):
         How many attempts should be made to initialize the walker positions
         before the simulation starts? The deault is 1000.
     meas_phot_kwargs : dict, optional
-        Keyword arguments to pass to `:class: rstar.MeasuredPhotometry`.
+        Keyword arguments to pass to `:class: stelpar.MeasuredPhotometry`.
         The default is `None`.
     
     """
@@ -232,7 +232,7 @@ class Estimate(object):
         
     def run(self, nwalkers, nsteps, progress=True, verbose=True):
         """
-        Wrapper for `rstar.MCMC.run` which runs MCMC simulation using `emcee`.
+        Wrapper for `stelpar.MCMC.run` which runs MCMC simulation using `emcee`.
 
         Parameters
         ----------
@@ -330,11 +330,11 @@ class Estimate(object):
 
         Returns
         -------
-        posterior : rstar.metadata.MetaDataFrame
+        posterior : stelpar.metadata.MetaDataFrame
             The estimated fit parameters and other stellar parameters, including uncertainties.
-        photometry : rstar.metadata.MetaDataFrame
+        photometry : stelpar.metadata.MetaDataFrame
             The measured and estimated magnitudes and other photometric data.
-        posterior_chains : rstar.metadata.MetaDataFrame
+        posterior_chains : stelpar.metadata.MetaDataFrame
             The flattened lists of estimated or interpolated values of each parameter (including non-fit parameters) 
             at every step of the simulation (i.e., the posterior distributions).
 
