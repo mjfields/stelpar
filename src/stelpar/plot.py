@@ -22,54 +22,6 @@ from .utils import (
 
 
 
-plt.style.use('default')
-
-plt.rcParams['font.family'] = 'stixgeneral'
-plt.rcParams['font.weight'] = 'demi'
-
-plt.rcParams['mathtext.fontset'] = 'custom'
-plt.rcParams['mathtext.bf'] = 'stixgeneral:demi'
-plt.rcParams['mathtext.rm'] = 'stixgeneral:demi'
-plt.rcParams['mathtext.it'] = 'stixgeneral:demi:italic'
-plt.rcParams['mathtext.sf'] = 'sans:demi' # used for stubborn symbols e.g. \star
-
-plt.rcParams['lines.linewidth'] = 4
-
-plt.rcParams['axes.linewidth'] = 4
-plt.rcParams['axes.labelweight'] = 'demi'
-plt.rcParams['axes.labelpad'] = 10.0
-plt.rcParams['axes.labelsize'] = 24
-plt.rcParams['axes.titlesize'] = 13
-plt.rcParams['axes.formatter.limits'] = [-4, 4]
-plt.rcParams['axes.edgecolor'] = 'black'
-plt.rcParams['axes.titlesize'] = 24
-plt.rcParams['axes.titleweight'] = 'demi'
- 
-plt.rcParams['xtick.labelsize'] = 22
-plt.rcParams['xtick.major.size'] = 8
-plt.rcParams['xtick.major.width'] = 3
-
-plt.rcParams['ytick.labelsize'] = 22
-plt.rcParams['ytick.major.size'] = 8
-plt.rcParams['ytick.major.width'] = 3
-
-plt.rcParams['legend.fontsize'] = 22
-plt.rcParams['legend.frameon'] = True
-plt.rcParams['legend.edgecolor'] = 'black'
-plt.rcParams['legend.numpoints'] = 1
-plt.rcParams['legend.framealpha'] = 0.5
-plt.rcParams['legend.loc'] = 'best'
-
-plt.rcParams['figure.figsize'] = (10, 8)
-plt.rcParams['figure.titleweight'] = 'demi'
-plt.rcParams['figure.titlesize'] = 30
-plt.rcParams['figure.dpi'] = 300
-
-plt.rcParams['savefig.bbox'] = 'tight'
-
-
-
-
 
 def time_series(samples, savefile=None, show=True):
     
