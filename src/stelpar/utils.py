@@ -226,13 +226,13 @@ def plot_labels(zero_extinction=False):
     
     df = pd.DataFrame(index=params)
     
-    df.loc['age', ['label', 'fancy_label', 'fancy_label_unitless']] = 'age (Myr)', '$\\tau_{\mathsf{\\star}} \, \mathrm{(Myr)}$', '$\\tau_{\mathsf{\\star}}$'
-    df.loc['mass', ['label', 'fancy_label', 'fancy_label_unitless']] = 'mass (M_Sun)', '$M_{\mathsf{\\star}} \, (\mathrm{M}_{\\odot})$', '$M_{\mathsf{\\star}}$'
-    df.loc['Av', ['label', 'fancy_label', 'fancy_label_unitless']] = 'Av [mag]', '$A_V \ \mathrm{[mag]}$', '$A_V$'
-    df.loc['f', ['label', 'fancy_label', 'fancy_label_unitless']] = 'f [mag]', '$f \ \mathrm{[mag]}$', '$f$'
-    df.loc['radius', ['label', 'fancy_label', 'fancy_label_unitless']] = 'radius (R_Sun)', '$R_{\mathsf{\\star}} \, (\mathrm{R}_{\\odot})$', '$R_{\mathsf{\\star}}$'
-    df.loc['Teff', ['label', 'fancy_label', 'fancy_label_unitless']] = 'Teff (K)', '$T_{\mathrm{eff}} \, \mathrm{(K)}$', '$T_{\mathrm{eff}}$'
-    df.loc['density', ['label', 'fancy_label', 'fancy_label_unitless']] = 'density (M_Sun/R_Sun^3)', '$\\rho_{\mathsf{\\star}} \, (\mathrm{M}_{\\odot}/{R_{\\odot}}^3)$', '$\\rho_{\mathsf{\\star}}$)'
+    df.loc['age', ['label', 'fancy_label', 'fancy_label_unitless']] = 'age (Myr)', r'$\\tau_{\mathsf{\\star}} \, \mathrm{(Myr)}$', r'$\\tau_{\mathsf{\\star}}$'
+    df.loc['mass', ['label', 'fancy_label', 'fancy_label_unitless']] = 'mass (M_Sun)', r'$M_{\mathsf{\\star}} \, (\mathrm{M}_{\\odot})$', r'$M_{\mathsf{\\star}}$'
+    df.loc['Av', ['label', 'fancy_label', 'fancy_label_unitless']] = 'Av [mag]', r'$A_V \ \mathrm{[mag]}$', r'$A_V$'
+    df.loc['f', ['label', 'fancy_label', 'fancy_label_unitless']] = 'f [mag]', r'$f \ \mathrm{[mag]}$', r'$f$'
+    df.loc['radius', ['label', 'fancy_label', 'fancy_label_unitless']] = 'radius (R_Sun)', r'$R_{\mathsf{\\star}} \, (\mathrm{R}_{\\odot})$', r'$R_{\mathsf{\\star}}$'
+    df.loc['Teff', ['label', 'fancy_label', 'fancy_label_unitless']] = 'Teff (K)', r'$T_{\mathrm{eff}} \, \mathrm{(K)}$', r'$T_{\mathrm{eff}}$'
+    df.loc['density', ['label', 'fancy_label', 'fancy_label_unitless']] = 'density (M_Sun/R_Sun^3)', r'$\\rho_{\mathsf{\\star}} \, (\mathrm{M}_{\\odot}/{R_{\\odot}}^3)$', r'$\\rho_{\mathsf{\\star}}$)'
     
     if zero_extinction:
         df.drop(index='Av', inplace=True)
@@ -251,10 +251,10 @@ def phot_plot_labels():
         'gaia_gmag' : 'G',
         'gaia_bpmag' : 'G$_{BP}$',
         'gaia_rpmag' : 'G$_{RP}$',
-        'sdss_gmag' : 'g${\prime}$',
-        'sdss_rmag' : 'r${\prime}$',
-        'sdss_imag' : 'i${\prime}$',
-        'sdss_zmag' : 'z${\prime}$',
+        'sdss_gmag' : r'g${\prime}$',
+        'sdss_rmag' : r'r${\prime}$',
+        'sdss_imag' : r'i${\prime}$',
+        'sdss_zmag' : r'z${\prime}$',
         'johnson_bmag' : 'B',
         'johnson_vmag' : 'V',
         'cousins_rmag' : 'R',
@@ -347,7 +347,12 @@ def load_isochrone(filename):
     with warnings.catch_warnings():
         warnings.simplefilter('ignore')
     
-        return pd.read_csv(filename, index_col=('age','mass'), dtype=np.float32, converters={'age':Decimal, 'mass':Decimal})
+        return pd.read_csv(
+            filename, 
+            index_col=('age','mass'), 
+            dtype=float, 
+            # converters={'age':Decimal, 'mass':Decimal}
+            )
     
     
     
@@ -391,7 +396,10 @@ def interpolate_nearest(idx, grid, agelist=None, masslist=None):
         
         
     try:
-        nearest_ages = [agelist[bisect_left(agelist, age) - 1], agelist[bisect_left(agelist, age)]]
+        nearest_ages = np.array(
+            [agelist[bisect_left(agelist, age) - 1], agelist[bisect_left(agelist, age)]],
+            dtype=float
+            )
     except IndexError:
         df[df.columns] = np.nan
         if 'grid' in locals():
@@ -406,7 +414,10 @@ def interpolate_nearest(idx, grid, agelist=None, masslist=None):
         
         
     try:
-        nearest_masses = [masslist[bisect_left(masslist, mass) - 1], masslist[bisect_left(masslist, mass)]]
+        nearest_masses = np.array(
+            [masslist[bisect_left(masslist, mass) - 1], masslist[bisect_left(masslist, mass)]],
+            dtype=float
+            )
     except IndexError:
         df[df.columns] = np.nan
     else:
@@ -442,7 +453,10 @@ def interpolate_hybrid(idx, grid, agelist=None, masslist=None):
         
     
     try:
-        nearest_ages = [agelist[bisect_left(agelist, age) - 1], agelist[bisect_left(agelist, age)]]
+        nearest_ages = np.array(
+            [agelist[bisect_left(agelist, age) - 1], agelist[bisect_left(agelist, age)]],
+            dtype=float
+            )
     except IndexError:
         df[df.columns] = np.nan
         if 'grid' in locals():
@@ -456,9 +470,53 @@ def interpolate_hybrid(idx, grid, agelist=None, masslist=None):
     
     f = interp1d(mass_df.index.values, mass_df.values, kind='linear', axis=0, bounds_error=False, fill_value=np.nan, assume_sorted=False)
     
-    
     try:
         df[df.columns] = f(mass)
+    except KeyError:
+        df[df.columns] = np.nan
+    finally:
+        if 'grid' in locals():
+            del grid
+            
+        return df
+    
+
+
+
+# use nearest neighbor in age, then use `scipy.interpolate.interp1d` to interpolate mass
+def interpolate_hybrid_(idx, grid, agelist=None, masslist=None):
+    
+    age, mass = idx
+    
+    if type(grid) is str:
+        grid = pd.read_pickle(grid)
+        
+    df = pd.DataFrame(columns=grid.columns, index=pd.MultiIndex.from_product([[age], [mass]], names=('age', 'mass')), dtype=float)
+    
+    
+    if agelist is None:
+        agelist = grid.index.get_level_values('age').drop_duplicates()
+        
+    
+    try:
+        nearest_ages = np.array(
+            [agelist[bisect_left(agelist, age) - 1], agelist[bisect_left(agelist, age)]],
+            dtype=float
+            )
+    except IndexError:
+        df[df.columns] = np.nan
+        if 'grid' in locals():
+            del grid
+        return df
+    else:
+        closest_age = nearest_ages[np.argmin(np.diff([nearest_ages[0], age, nearest_ages[1]]))]
+    
+    
+    mass_df = grid.loc[closest_age]
+    
+    
+    try:
+        df[df.columns] = [np.interp(mass, mass_df.index.values, mass_df.values[:, i], left=np.nan, right=np.nan) for i in range(mass_df.values.shape[1])]
     except KeyError:
         df[df.columns] = np.nan
     finally:
