@@ -468,52 +468,6 @@ def interpolate_hybrid(idx, grid, agelist=None, masslist=None):
     
     mass_df = grid.loc[closest_age]
     
-    f = interp1d(mass_df.index.values, mass_df.values, kind='linear', axis=0, bounds_error=False, fill_value=np.nan, assume_sorted=False)
-    
-    try:
-        df[df.columns] = f(mass)
-    except KeyError:
-        df[df.columns] = np.nan
-    finally:
-        if 'grid' in locals():
-            del grid
-            
-        return df
-    
-
-
-
-# use nearest neighbor in age, then use `scipy.interpolate.interp1d` to interpolate mass
-def interpolate_hybrid_(idx, grid, agelist=None, masslist=None):
-    
-    age, mass = idx
-    
-    if type(grid) is str:
-        grid = pd.read_pickle(grid)
-        
-    df = pd.DataFrame(columns=grid.columns, index=pd.MultiIndex.from_product([[age], [mass]], names=('age', 'mass')), dtype=float)
-    
-    
-    if agelist is None:
-        agelist = grid.index.get_level_values('age').drop_duplicates()
-        
-    
-    try:
-        nearest_ages = np.array(
-            [agelist[bisect_left(agelist, age) - 1], agelist[bisect_left(agelist, age)]],
-            dtype=float
-            )
-    except IndexError:
-        df[df.columns] = np.nan
-        if 'grid' in locals():
-            del grid
-        return df
-    else:
-        closest_age = nearest_ages[np.argmin(np.diff([nearest_ages[0], age, nearest_ages[1]]))]
-    
-    
-    mass_df = grid.loc[closest_age]
-    
     
     try:
         df[df.columns] = [np.interp(mass, mass_df.index.values, mass_df.values[:, i], left=np.nan, right=np.nan) for i in range(mass_df.values.shape[1])]
