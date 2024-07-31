@@ -19,5 +19,3 @@ PARSECMODELPATH = os.path.abspath(os.path.join(os.path.dirname(__file__), r'..',
 GRIDCACHE = os.path.abspath(os.path.join(os.path.dirname(__file__), r'..', r'..', r'resources/.grid_cache'))
 
 FILTERPROFILESPATH = os.path.abspath(os.path.join(os.path.dirname(__file__), r'..', r'..', r'resources/Filter_Profiles'))
-
-REMOTEHOMEPATH = os.path.abspath(os.path.join(os.path.dirname(__file__), r'..', r'..'))

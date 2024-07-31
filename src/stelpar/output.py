@@ -9,38 +9,17 @@ import pandas as pd
 import pickle
 import os
 from datetime import datetime
-
-from .config import REMOTEHOMEPATH
 from .target import Target 
 
 
 
 
-# set the name of the parent output directory in the remote server
-def get_remote_parent_dir():
-    
-    n = 1
-    while True:
-        destination = os.path.abspath(os.path.join(REMOTEHOMEPATH, f'run{n:02d}'))
-            
-        if os.path.isdir(destination):
-            n += 1
-            continue
-        
-        return destination
-
-
-
 # pickle output and save it in dictionary structure
-def store_output(obj, collection=None, destination=None, notes=None, str_to_txt=False, remote=False):
+def store_output(obj, collection=None, destination=None, notes=None, str_to_txt=False):
     
     if destination is None:
         
-        if remote:
-            destination = get_remote_parent_dir()
-        
-        else:
-            destination = os.getcwd()
+        destination = os.getcwd()
         
     else:
         destination = os.path.abspath(destination)
@@ -72,11 +51,7 @@ def store_output(obj, collection=None, destination=None, notes=None, str_to_txt=
         i = 0
         while True:
             
-            if remote:
-                file = f'{target_name}.R{i}'
-            
-            else:
-                file = f'{target_name}.{i}'
+            file = f'{target_name}.{i}'
                 
             
             filepath = os.path.join(dirpath, file)
@@ -132,11 +107,7 @@ def store_output(obj, collection=None, destination=None, notes=None, str_to_txt=
         i = 0
         while True:
             
-            if remote:
-                file = f'{target_name}.R{i}'
-            
-            else:
-                file = f'{target_name}.{i}'
+            file = f'{target_name}.{i}'
                 
             
             filepath = os.path.join(dirpath, file)
@@ -172,7 +143,7 @@ def store_output(obj, collection=None, destination=None, notes=None, str_to_txt=
 
 
 # retrieve output data pickled via store_output
-def extract_output(name, location=None, collection=False): # only does local for now
+def extract_output(name, location=None, collection=False):
     
     name = name.replace(' ', '')
     
