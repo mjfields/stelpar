@@ -50,9 +50,14 @@ class Estimate(object):
         If 'nearest' uses nearest-neighbor interpolation. If 'hybrid' uses
         nearest-neighbor interpolation for age and DFInterpolator for mass.
         The default is 'true'.
+    include_params : list, optional
+        Which parameters (stellar and/or free parameters) to include in the final output. 
+        Fewer parameters may decrease runtime. if `zero_extinction=True`, extinction will
+        not be included even if it is listed here. If `None`, all parameters will be included. 
+        The default is `None`.
     use_synphot : bool, optional
         Use the built-in synphot methods to calculate extinction or calculate 
-        extinction with `numpy` arrays which is faster. The default is False.
+        extinction with `numpy` arrays which is faster. The default is `False`.
     zero_extinction : bool, optional
         If `True`, set extinction to zero (Av=0). The default is `False`.
     walker_init_tol : int, optional
@@ -64,7 +69,17 @@ class Estimate(object):
     
     """
     
-    def __init__(self, target, isochrone='mag', interp_method='true', use_synphot=False, zero_extinction=False, walker_init_tol=1000, meas_phot_kwargs=None):
+    def __init__(
+            self, 
+            target, 
+            isochrone='mag', 
+            interp_method='true', 
+            include_params=None, 
+            use_synphot=False,
+            zero_extinction=False, 
+            walker_init_tol=1000, 
+            meas_phot_kwargs=None
+            ):
         
         ## setup target-specific metadata
         
@@ -165,6 +180,26 @@ class Estimate(object):
         ## check if extinction is going to be set to zero
         
         self._zero_extinction = zero_extinction
+
+
+        ## which parameters will be included in the final output
+
+        self._default_params = ['age', 'mass', 'Av', 'f', 'Teff', 'logg', 'logL', 'radius', 'density']
+        if include_params is not None:
+
+            if not set(include_params).issubset(set(self._default_params)):
+                raise KeyError(
+                    "Invalid parameter(s) in `include_params`. "
+                    f"Possible parameters include {self._default_params}."
+                    )
+            
+            self._params = include_params
+        
+        else:
+            self._params = self._default_params
+
+        if self._zero_extinction:
+            self._params = [p for p in self._params if p!='Av']
         
         
         ## check the walker positions initialization tolerance
@@ -242,7 +277,7 @@ class Estimate(object):
         progress : bool, optional
             If `True`, provides a progress bar during the sumulation.  The default is `True`.
         verbose : bool, optional
-            If `True`, uses print statements to indicate the current status of the simulation.
+            If `True`, outputs the current status of the simulation.
             The defauls is `True`.
 
         Returns
@@ -364,11 +399,9 @@ class Estimate(object):
         
         
         if self._zero_extinction:
-            params = ['age', 'mass', 'f', 'radius', 'Teff', 'density']
             posterior_chains = pd.DataFrame(flat_samples, columns=['age', 'mass', 'f'])
             
         else:
-            params = ['age', 'mass', 'Av', 'f', 'radius', 'Teff', 'density']
             posterior_chains = pd.DataFrame(flat_samples, columns=['age', 'mass', 'Av', 'f'])
         
         
@@ -398,41 +431,48 @@ class Estimate(object):
             sp = self._sp
         
         
-        # try to use pool to parallelize this if possible
-        if self._pool is  None:
+        ## get the posterior chains of the non-fit parameters
+
+        other_params = [p for p in self._params if p not in ['age', 'mass', 'Av', 'f', 'density']]
+
+        if len(other_params) > 0:
             
-            posterior_chains[['radius', 'Teff']] = pd.concat(
-                [sp.interpolate_isochrone((posterior_chains['age'][i], posterior_chains['mass'][i])).loc[(posterior_chains['age'][i], posterior_chains['mass'][i]), ['radius', 'Teff']]
-                  for i in tqdm(range(len(flat_samples)))],
-                ignore_index=True)
-        else:
+            # try to use pool to parallelize this if possible
+            if self._pool is None:
+                
+                posterior_chains[other_params] = pd.concat(
+                    [sp.interpolate_isochrone((posterior_chains['age'][i], posterior_chains['mass'][i])).loc[(posterior_chains['age'][i], posterior_chains['mass'][i]), other_params]
+                    for i in tqdm(range(len(flat_samples)))],
+                    ignore_index=True)
+            else:
+                
+                map_func = self._pool.imap
             
-            map_func = self._pool.imap
+                time.sleep(1)
+                
+                posterior_chains[other_params] = pd.concat(
+                    list(
+                        res.loc[:, other_params] for res in tqdm(
+                            map_func(
+                                sp.interpolate_isochrone, 
+                                ((posterior_chains['age'][i], posterior_chains['mass'][i]) for i in range(len(posterior_chains)))
+                                ), total=len(posterior_chains)
+                            )
+                        ), 
+                    ignore_index=True
+                    )
         
-            time.sleep(1)
-            
-            posterior_chains[['radius', 'Teff']] = pd.concat(
-                list(
-                    res.loc[:, ['radius', 'Teff']] for res in tqdm(
-                        map_func(
-                            sp.interpolate_isochrone, 
-                            ((posterior_chains['age'][i], posterior_chains['mass'][i]) for i in range(len(posterior_chains)))
-                            ), total=len(posterior_chains)
-                        )
-                    ), 
-                ignore_index=True
-                )
-    
-            time.sleep(1)
+                time.sleep(1)
         
-    
-        posterior_chains['density'] = posterior_chains['mass'] / (posterior_chains['radius']**3)
+
+        if 'density' in self._params:
+            posterior_chains['density'] = posterior_chains['mass'] / (posterior_chains['radius']**3)
         
-        posterior = pd.DataFrame(index=params)
+        posterior = pd.DataFrame(index=self._params)
         
         # calculate the median value (50th percentile), and upper and lower confidence 
         # (84th and 16th percentiles) for each parameter
-        for p in params:
+        for p in self._params:
             mc = np.nanpercentile(posterior_chains[p], [16, 50, 84])
             q = np.diff(mc)
             
@@ -663,7 +703,16 @@ class EstimateResults(object):
     
     
     
-    def __init__(self, target=None, sampler=None, posterior=None, photometry=None, chains=None, options=None, stats=None):
+    def __init__(
+            self, 
+            target=None, 
+            sampler=None, 
+            posterior=None, 
+            photometry=None, 
+            chains=None, 
+            options=None, 
+            stats=None
+            ):
         
         self._input = dict()
         self._output = dict()
