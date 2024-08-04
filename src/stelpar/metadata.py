@@ -707,7 +707,7 @@ class MetaDataFrame(pd.DataFrame):
             'mass' : {
                 'dtype' : 'float64',
                 'format' : '.6g',
-                'unit' : 'solMass',
+                'unit' : 'Msun',
                 'description' : 'estimated stellar mass'
                 },
             'Av' : {
@@ -722,22 +722,34 @@ class MetaDataFrame(pd.DataFrame):
                 'unit' : 'mag',
                 'description' : 'underestimation of measured magnitude uncertainties'
                 },
-            'radius' : {
-                'dtype' : 'float64',
-                'format' : '.6g',
-                'unit' : 'solRad',
-                'description' : 'estimated stellar radius'
-                },
             'Teff' : {
                 'dtype' : 'float64',
                 'format' : '.6g',
                 'unit' : 'K',
                 'description' : 'estimated stellar effective temperature'
                 },
+            'logL' : {
+                'dtype' : 'float64',
+                'format' : '.6g',
+                'unit' : 'log(Lsun)',
+                'description' : 'estimated stellar luminosity'
+                },
+            'logg' : {
+                'dtype' : 'float64',
+                'format' : '.6g',
+                'unit' : 'log(cm s^-2)',
+                'description' : 'estimated stellar surface gravity'
+                },
+            'radius' : {
+                'dtype' : 'float64',
+                'format' : '.6g',
+                'unit' : 'Rsun',
+                'description' : 'estimated stellar radius'
+                },
             'density' : {
                 'dtype' : 'float64',
                 'format' : '.6g',
-                'unit' : 'solMass solRad^-3',
+                'unit' : 'Msun Rsun^-3',
                 'description' : 'estimated stellar density calculated as mass divided by cubed-radius'
                 }
             }
