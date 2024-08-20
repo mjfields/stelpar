@@ -28,9 +28,13 @@ dependencies = [
     "tqdm",
     "matplotlib",
     "corner",
-    "setuptools"
 ]
 dynamic = ["readme"]
+
+[project.optional-dependencies]
+exe = ["setuptools"]
+test = ["pytest", "pytest-cov"]
+notebook = ["jupyter"]
 
 [tool.setuptools.dynamic]
 readme = {file = ["README.md"]}
@@ -38,3 +42,7 @@ readme = {file = ["README.md"]}
 [tool.setuptools]
 packages = ["stelpar"]
 package-dir = {"" = "src"}
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+addopts = ["--import-mode=importlib"]
