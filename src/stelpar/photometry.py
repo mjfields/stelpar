@@ -66,7 +66,7 @@ class MeasuredPhotometry(object):
     lazy_tol : bool, optional
         If `True` (default), will find the search radius where all queried
         tables contain 1 target. If `False`, will save each table successively
-        once they contain only 1 target (trying to maximize photometry amount).
+        once they contain only 1 target (attempting to maximize photometry amount).
     vizier_kwargs : dict, optional
         Keyword arguments passable to `astroquery.vizier.Vizier` or related methods. See
         https://astroquery.readthedocs.io/en/latest/api/astroquery.vizier.VizierClass.html#astroquery.vizier.VizierClass
@@ -286,13 +286,13 @@ class MeasuredPhotometry(object):
                 
             
         
-        photometry = pd.DataFrame()
+        meta = self._photometry_meta
+
+        photometry = pd.DataFrame(index=pd.Index(meta.index.get_level_values('band'), name="band"))
         
         # suppress `UserWarning` when masked element from table is converted to NaN 
         with warnings.catch_warnings():
             warnings.simplefilter('ignore')
-            
-            meta = self._photometry_meta
             
             plx_mas, plxe_mas, ruwe = np.nan, np.nan, np.nan
             
@@ -309,9 +309,16 @@ class MeasuredPhotometry(object):
                         
                         mag, error, system, analog = meta.loc[(catalog, band)]
                         
-                        photometry.loc[band, 'apparent_magnitude'], photometry.loc[band, 'apparent_magnitude_error'] = table[mag], table[error]
-                        photometry.loc[band, 'system'] = system.upper()
-                        photometry.loc[band, 'isochrone_analog'] = analog.lower()
+                        if len(table[mag]) != 1 or len(table[error]) != 1:
+                            photometry.loc[band, 'apparent_magnitude'] = np.nan
+                            photometry.loc[band, 'apparent_magnitude_error'] = np.nan
+                            photometry.loc[band, 'system'] = system.upper()
+                            photometry.loc[band, 'isochrone_analog'] = analog.lower()
+                        else:
+                            photometry.loc[band, 'apparent_magnitude'] = table[mag]
+                            photometry.loc[band, 'apparent_magnitude_error'] = table[error]
+                            photometry.loc[band, 'system'] = system.upper()
+                            photometry.loc[band, 'isochrone_analog'] = analog.lower()
                         
                     if 'gaia' in catalog.lower():
                         
@@ -325,7 +332,8 @@ class MeasuredPhotometry(object):
                         
                         mag, error, system, analog = meta.loc[(catalog, band)]
                         
-                        photometry.loc[band, 'apparent_magnitude'], photometry.loc[band, 'apparent_magnitude_error'] = mag, error
+                        photometry.loc[band, 'apparent_magnitude'] = mag
+                        photometry.loc[band, 'apparent_magnitude_error'] = error
                         photometry.loc[band, 'system'] = system.upper()
                         photometry.loc[band, 'isochrone_analog'] = analog.lower()
                 
@@ -362,7 +370,7 @@ class MeasuredPhotometry(object):
         
         
         # Luri et al. 2018 suggest a full Bayesian approach for dealing with negitive parallaxes
-        # I'm ignoring this and cutting them out b/c I can't be bothered right now
+        # I'm ignoring this and cutting them out
         if parallax < 0 or parallax_error < 0:
             term_message = f"Failed for {self.name}: parallax or error is negative. Ignoring Luri+2018 and removing the target."
             
