@@ -225,11 +225,25 @@ class MCMC(object):
         before the simulation starts? The deault is 1000.
     walker_init_context : object, optional
         Context manager within which the walkers are initialized. Will either
-        be this library's `WaitingAnimation` or `contextlib.nullcontext`.
-    
+        be this module's `WaitingAnimation` or `contextlib.nullcontext`.
+    emcee_kwargs : dict, optional
+        Other optional keyword arguments to pass to `emcee.EnsembleSampler`.
+        The default is `None`.
     """
     
-    def __init__(self, nwalkers, nsteps, log_probability_func, initial_conditions=None, moves=None, pool=None, zero_extinction=False, walker_init_tol=1000, walker_init_context=None):
+    def __init__(
+        self, 
+        nwalkers, 
+        nsteps, 
+        log_probability_func, 
+        initial_conditions=None, 
+        moves=None, 
+        pool=None, 
+        zero_extinction=False, 
+        walker_init_tol=1000, 
+        walker_init_context=None,
+        emcee_kwargs=None
+    ):
         
         self.nwalkers = nwalkers
         self.nsteps = nsteps
@@ -262,12 +276,17 @@ class MCMC(object):
         else:
             self.ndim = 4
         
-        self.sampler = emcee.EnsembleSampler(nwalkers=self.nwalkers,
-                                     ndim=self.ndim,
-                                     log_prob_fn=self._log_probability_func,
-                                     pool=self._pool,
-                                     moves=self.moves
-                                     )
+        if emcee_kwargs is None:
+            self._emcee_kwargs = dict()
+        
+        self.sampler = emcee.EnsembleSampler(
+            nwalkers=self.nwalkers,
+            ndim=self.ndim,
+            log_prob_fn=self._log_probability_func,
+            pool=self._pool,
+            moves=self.moves,
+            **self._emcee_kwargs
+        )
         
         
         

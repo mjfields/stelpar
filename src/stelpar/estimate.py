@@ -264,7 +264,7 @@ class Estimate(object):
         
         
         
-    def run(self, nwalkers, nsteps, progress=True, verbose=True):
+    def run(self, nwalkers, nsteps, progress=True, verbose=True, emcee_kwargs=None):
         """
         Wrapper for `stelpar.MCMC.run` which runs MCMC simulation using `emcee`.
 
@@ -279,6 +279,9 @@ class Estimate(object):
         verbose : bool, optional
             If `True`, outputs the current status of the simulation.
             The defauls is `True`.
+        emcee_kwargs : dict, optional
+            Other optional keyword arguments to pass to `emcee.EnsembleSampler`.
+            The default is `None`.
 
         Returns
         -------
@@ -304,7 +307,18 @@ class Estimate(object):
             
         time.sleep(1)
         
-        mcmc = MCMC(nwalkers, nsteps, self.log_prob_fn, self._ic, self._moves, pool=self._pool, zero_extinction=self._zero_extinction, walker_init_tol=self._walker_init_tol, walker_init_context=walker_context)
+        mcmc = MCMC(
+            nwalkers, 
+            nsteps, 
+            self.log_prob_fn, 
+            self._ic, 
+            self._moves, 
+            pool=self._pool, 
+            zero_extinction=self._zero_extinction, 
+            walker_init_tol=self._walker_init_tol, 
+            walker_init_context=walker_context,
+            emcee_kwargs=emcee_kwargs
+        )
         
         mcmc.run(progress=True)
         
