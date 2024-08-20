@@ -210,8 +210,8 @@ def flux_v_wavelength(photometry, title=None, singlefig=True, savefile=None, sho
     alpha = 1
     ylabel_coords = (-0.085, 0.5)
     
-    wav_label = '$\mathbf{\\lambda} \\ \\left( \mathbf{\\mu}\mathrm{m} \\right)$'
-    flux_label = '$\mathbf{F_{\\lambda}} \\ \\left( \mathrm{erg} \\ \mathrm{cm}\mathbf{^{-2}} \\ \mathrm{s}\mathbf{^{-1}} \\ \\AA\mathbf{^{-1}} \\right)$'
+    wav_label = r'$\mathbf{\\lambda} \\ \\left( \mathbf{\\mu}\mathrm{m} \\right)$'
+    flux_label = r'$\mathbf{F_{\\lambda}} \\ \\left( \mathrm{erg} \\ \mathrm{cm}\mathbf{^{-2}} \\ \mathrm{s}\mathbf{^{-1}} \\ \\AA\mathbf{^{-1}} \\right)$'
     
     obs_color = 'black'
     med_color = 'mediumblue' # (0.35, 0.55, 0.35)
@@ -535,7 +535,7 @@ def mag_v_wavelength(photometry, savefile=None, show=True):
     alpha = 1.0
     ylabel_coords = (-0.085, 0.5)
     
-    wav_label = '$\mathbf{\\lambda} \\ \\left( \mathbf{\\mu}\mathrm{m} \\right)$'
+    wav_label = r'$\mathbf{\\lambda} \\ \\left( \mathbf{\\mu}\mathrm{m} \\right)$'
     mag_label = 'Absolute Magnitude [mag]'
     
     obs_color = 'black'
@@ -707,7 +707,7 @@ def mag_v_wavelength_eyecheck(photometry, name=None, savefile=None, show=True):
         elinewidth=1.5,
         )
     
-    ax.set_xlabel("$\lambda$ ($\mu$m)")
+    ax.set_xlabel(r"$\lambda$ ($\mu$m)")
     ax.set_ylabel("$m$ [mag]")
     
     ylim = ax.get_ylim()
