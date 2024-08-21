@@ -5,6 +5,7 @@
 
 import numpy as np
 import emcee
+from tqdm import tqdm
 
 import warnings
 
@@ -226,8 +227,9 @@ class MCMC(object):
     walker_init_context : object, optional
         Context manager within which the walkers are initialized. Will either
         be this module's `WaitingAnimation` or `contextlib.nullcontext`.
-    emcee_kwargs : dict, optional
-        Other optional keyword arguments to pass to `emcee.EnsembleSampler`.
+    backend : emcee.backends.HDFBackend, optional
+        Backend to save progress of MCMC. 
+        See https://emcee.readthedocs.io/en/stable/tutorials/monitor/ for more information.
         The default is `None`.
     """
     
@@ -242,7 +244,7 @@ class MCMC(object):
         zero_extinction=False, 
         walker_init_tol=1000, 
         walker_init_context=None,
-        emcee_kwargs=None
+        backend=None
     ):
         
         self.nwalkers = nwalkers
@@ -275,9 +277,14 @@ class MCMC(object):
             self.initial_conditions.drop(index='Av', inplace=True)
         else:
             self.ndim = 4
-        
-        if emcee_kwargs is None:
-            self._emcee_kwargs = dict()
+
+        if backend is not None:
+            if isinstance(backend, emcee.backends.HDFBackend):
+                self.backend = backend
+            else:
+                raise TypeError("backend must be `emcee.backends.HDFBackend` object")
+        else:
+            self.backend = backend
         
         self.sampler = emcee.EnsembleSampler(
             nwalkers=self.nwalkers,
@@ -285,7 +292,7 @@ class MCMC(object):
             log_prob_fn=self._log_probability_func,
             pool=self._pool,
             moves=self.moves,
-            **self._emcee_kwargs
+            backend=self.backend
         )
         
         
@@ -317,6 +324,26 @@ class MCMC(object):
             
         return pos
     
+
+
+
+    def _run_with_backend(self, progress):
+
+        initial_state=self.backend.get_last_sample()
+        nsteps_remaining = self.nsteps - self.backend.iteration
+
+        with warnings.catch_warnings():
+            warnings.simplefilter('ignore')
+
+            with tqdm(initial=self.backend.iteration, total=self.nsteps) as pbar:
+                for sample in self.sampler.sample(
+                    initial_state=initial_state,
+                    iterations=nsteps_remaining
+                ):
+                    
+                    if progress:
+                        pbar.update(1)
+    
     
     
     
@@ -330,6 +357,12 @@ class MCMC(object):
             If `True`, provides a progress bar during the sumulation.  The default is True.
 
         """
+
+        if self.backend is not None:
+            if self.backend.iteration > 0:
+                self._run_with_backend(progress=progress)
+                return
+        
         
         with self._walker_init_context:
             pos = self._get_pos()

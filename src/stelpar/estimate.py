@@ -66,7 +66,6 @@ class Estimate(object):
     meas_phot_kwargs : dict, optional
         Keyword arguments to pass to `:class: stelpar.MeasuredPhotometry`.
         The default is `None`.
-    
     """
     
     def __init__(
@@ -264,7 +263,7 @@ class Estimate(object):
         
         
         
-    def run(self, nwalkers, nsteps, progress=True, verbose=True, emcee_kwargs=None):
+    def run(self, nwalkers, nsteps, progress=True, verbose=True, backend=None):
         """
         Wrapper for `stelpar.MCMC.run` which runs MCMC simulation using `emcee`.
 
@@ -279,8 +278,9 @@ class Estimate(object):
         verbose : bool, optional
             If `True`, outputs the current status of the simulation.
             The defauls is `True`.
-        emcee_kwargs : dict, optional
-            Other optional keyword arguments to pass to `emcee.EnsembleSampler`.
+        backend : emcee.backends.HDFBackend, optional
+            Backend to save progress of MCMC. 
+            See https://emcee.readthedocs.io/en/stable/tutorials/monitor/ for more information.
             The default is `None`.
 
         Returns
@@ -317,10 +317,10 @@ class Estimate(object):
             zero_extinction=self._zero_extinction, 
             walker_init_tol=self._walker_init_tol, 
             walker_init_context=walker_context,
-            emcee_kwargs=emcee_kwargs
+            backend=backend
         )
         
-        mcmc.run(progress=True)
+        mcmc.run(progress=progress)
         
         time.sleep(1)
         

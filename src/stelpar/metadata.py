@@ -193,7 +193,7 @@ class InitialConditions(object):
 class Moves(object):
     
     """
-    The backend framework to access and manipulate the ensemble moves for the simulation. 
+    The framework to access and manipulate the ensemble moves for the simulation. 
     See https://emcee.readthedocs.io/en/stable/user/moves/ for more information.
     
     """
@@ -255,10 +255,10 @@ class Moves(object):
     def reset(self):
         
         self._moves = self._default_moves
-        
-        
-        
-        
+
+
+
+
 class PhotometryMetadata(object):
     
     """
