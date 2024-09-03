@@ -353,7 +353,7 @@ class Estimate(object):
         
         
         
-    def posterior(self, sampler, thin=1, discard=0, force_true_interp=False, verbose=True):
+    def posterior(self, sampler, thin=1, discard=0, max_prob=False, force_true_interp=False, verbose=True):
         """
         Calculates full posterior distributions for the fit parameters and others, including radius, Teff, and density. 
         Interpolates estimated magnitudes from age and mass obtained from fit.
@@ -368,6 +368,9 @@ class Estimate(object):
         discard : int, optional
             Remove (burnin) the first `discard` elements from the posterior.
             The defult is 0.
+        max_prob : bool, optional
+            Whether to calculate maximum-probability parameters. This can be computationally expensive.
+            The default is `False`.
         force_true_interp : bool, optional
             If `True`, the non-fit chains are interpolated using the 'true' interpolation
             method. If `False` (default), uses the same interpolation method as the
@@ -406,10 +409,11 @@ class Estimate(object):
             flat_samples = samples(flat=True)
         
         
-        if verbose:
-            print("\ncalculating max log probability:")
-        
-        log_prob, max_prob_index = self._max_log_probability(flat_samples)
+        if max_prob:
+            if verbose:
+                print("\ncalculating max log probability:")
+            
+            log_prob, max_prob_index = self._max_log_probability(flat_samples)
         
         
         if self._zero_extinction:
@@ -420,7 +424,7 @@ class Estimate(object):
         
         
         if verbose:
-            print("\ngetting radius and Teff chains:")
+            print("\ngetting other parameter chains:")
             
             
             
@@ -491,7 +495,10 @@ class Estimate(object):
             q = np.diff(mc)
             
             posterior.loc[p, 'median'] = mc[1]
-            posterior.loc[p, 'max_probability'] = posterior_chains.loc[max_prob_index, p]
+
+            if max_prob:
+                posterior.loc[p, 'max_probability'] = posterior_chains.loc[max_prob_index, p]
+            
             posterior.loc[p, 'uncertainty'] = np.mean([q[0], q[1]])
             posterior.loc[p, '+'] = q[1]
             posterior.loc[p, '-'] = q[0]
@@ -502,47 +509,49 @@ class Estimate(object):
         if self._zero_extinction:
             # value of Av here doesn't matter as long as `zero_extinction=True`
             median_photometry_model, teff_lp = self._sp.photometry_model(posterior.loc['age', 'median'], posterior.loc['mass', 'median'], 0, zero_extinction=self._zero_extinction)
-            max_prob_photometry_model, teff_lp = self._sp.photometry_model(posterior.loc['age', 'max_probability'], posterior.loc['mass', 'max_probability'], 0, zero_extinction=self._zero_extinction)
+            if max_prob:
+                max_prob_photometry_model, teff_lp = self._sp.photometry_model(posterior.loc['age', 'max_probability'], posterior.loc['mass', 'max_probability'], 0, zero_extinction=self._zero_extinction)
             
         else:
             median_photometry_model, teff_lp = self._sp.photometry_model(posterior.loc['age', 'median'], posterior.loc['mass', 'median'], posterior.loc['Av', 'median'])
-            max_prob_photometry_model, teff_lp = self._sp.photometry_model(posterior.loc['age', 'max_probability'], posterior.loc['mass', 'max_probability'], posterior.loc['Av', 'max_probability'])
+            if max_prob:
+                max_prob_photometry_model, teff_lp = self._sp.photometry_model(posterior.loc['age', 'max_probability'], posterior.loc['mass', 'max_probability'], posterior.loc['Av', 'max_probability'])
         
         
         photometry = self.photometry
         
         med_f_abs = posterior.loc['f', 'median']
-        max_f_abs = posterior.loc['f', 'max_probability']
+        if max_prob:
+            max_f_abs = posterior.loc['f', 'max_probability']
         
         
         if median_photometry_model is not False:
-                    
-            photometry['MEDIAN_ABSOLUTE_MAGNITUDE'] = median_photometry_model.loc[:, 'CORRECTED_MAGNITUDE']
-            photometry['MEDIAN_ABSOLUTE_MAGNITUDE_ERROR'] = photometry.loc[:, 'ABSOLUTE_MAGNITUDE_ERROR'].apply(sigma, args=([med_f_abs]))
             
-            photometry['median_apparent_magnitude'] = photometry.loc[:, 'MEDIAN_ABSOLUTE_MAGNITUDE'].apply(app_mag, args=([photometry['parallax'][0]]))
-            photometry['median_apparent_magnitude_error'] = photometry.loc[:, 'MEDIAN_ABSOLUTE_MAGNITUDE_ERROR'].apply(app_mag_error, args=([photometry['parallax'][0], photometry['parallax_error'][0]]))
-        
+            photometry = photometry.assign(
+                MEDIAN_ABSOLUTE_MAGNITUDE=median_photometry_model['CORRECTED_MAGNITUDE'],
+                MEDIAN_ABSOLUTE_MAGNITUDE_ERROR=lambda x: x['ABSOLUTE_MAGNITUDE_ERROR'].apply(sigma, args=([med_f_abs])),
+                median_apparent_magnitude=lambda x: x['MEDIAN_ABSOLUTE_MAGNITUDE'].apply(app_mag, args=([x['parallax'].values[0]])),
+                median_apparent_magnitude_error=lambda x: x['MEDIAN_ABSOLUTE_MAGNITUDE_ERROR'].apply(app_mag_error, args=([x['parallax'].values[0], x['parallax_error'].values[0]]))
+            )
+
             
             for band in photometry.index:
-                photometry.loc[band, ['median_flux', 'median_flux_error']] = mag_to_flux(*photometry.loc[band, ['median_apparent_magnitude', 'zeropoint_flux', 'median_apparent_magnitude_error']])
-        
-        
+                photometry.loc[(band, ['median_flux', 'median_flux_error'])] = mag_to_flux(*photometry.loc[(band, ['median_apparent_magnitude', 'zeropoint_flux', 'median_apparent_magnitude_error'])])
+
             photometry['median_percent_error'] = 100 * np.abs((photometry['flux'] - photometry['median_flux']) / photometry['flux'])
         
         
-        if max_prob_photometry_model is not False:
+        if max_prob and max_prob_photometry_model is not False:
+
+            photometry = photometry.assign(
+                MAX_PROBABILITY_ABSOLUTE_MAGNITUDE=median_photometry_model['CORRECTED_MAGNITUDE'],
+                MAX_PROBABILITY_ABSOLUTE_MAGNITUDE_ERROR=lambda x: x['ABSOLUTE_MAGNITUDE_ERROR'].apply(sigma, args=([max_f_abs])),
+                max_probability_apparent_magnitude=lambda x: x['MAX_PROBABILITY_ABSOLUTE_MAGNITUDE'].apply(app_mag, args=([x['parallax'].values[0]])),
+                max_probability_apparent_magnitude_error=lambda x: x['MAX_PROBABILITY_ABSOLUTE_MAGNITUDE_ERROR'].apply(app_mag_error, args=([x['parallax'].values[0], x['parallax_error'].values[0]]))
+            )
         
-            photometry['MAX_PROBABILITY_ABSOLUTE_MAGNITUDE'] = max_prob_photometry_model.loc[:, 'CORRECTED_MAGNITUDE']
-            photometry['MAX_PROBABILITY_ABSOLUTE_MAGNITUDE_ERROR'] = photometry.loc[:, 'ABSOLUTE_MAGNITUDE_ERROR'].apply(sigma, args=([max_f_abs]))
-            
-            photometry['max_probability_apparent_magnitude'] = photometry.loc[:, 'MAX_PROBABILITY_ABSOLUTE_MAGNITUDE'].apply(app_mag, args=([photometry['parallax'][0]]))
-            photometry['max_probability_apparent_magnitude_error'] = photometry.loc[:, 'MAX_PROBABILITY_ABSOLUTE_MAGNITUDE_ERROR'].apply(app_mag_error, args=([photometry['parallax'][0], photometry['parallax_error'][0]]))
-        
-            
             for band in photometry.index:
-                photometry.loc[band, ['max_probability_flux', 'max_probability_flux_error']] = mag_to_flux(*photometry.loc[band, ['max_probability_apparent_magnitude', 'zeropoint_flux', 'max_probability_apparent_magnitude_error']])
-        
+                photometry.loc[(band, ['max_probability_flux', 'max_probability_flux_error'])] = mag_to_flux(*photometry.loc[(band, ['max_probability_apparent_magnitude', 'zeropoint_flux', 'max_probability_apparent_magnitude_error'])])
         
             photometry['max_probability_percent_error'] = 100 * np.abs((photometry['flux'] - photometry['max_probability_flux']) / photometry['flux'])
         
