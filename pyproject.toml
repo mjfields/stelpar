@@ -34,7 +34,7 @@ dynamic = ["readme"]
 [project.optional-dependencies]
 exe = ["setuptools"]
 test = ["pytest", "pytest-cov"]
-notebook = ["jupyter"]
+notebook = ["jupyter", "h5py"]
 
 [tool.setuptools.dynamic]
 readme = {file = ["README.md"]}
