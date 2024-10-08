@@ -4,6 +4,7 @@ from .photometry import MeasuredPhotometry, SyntheticPhotometry
 from .simulation import Probability, MCMC
 from .estimate import Estimate
 from .target import Target
+from . import plot, output
 
 
 
@@ -13,5 +14,7 @@ __all__ = [
     'MeasuredPhotometry',
     'Probability',
     'SyntheticPhotometry',
-    'Target'
+    'Target',
+    'plot',
+    'output'
     ]

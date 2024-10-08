@@ -734,7 +734,7 @@ def mag_v_wavelength_eyecheck(photometry, name=None, savefile=None, show=True):
         plt.close(fig)
     
     
-    return fig
+    # return fig
 
 
 
