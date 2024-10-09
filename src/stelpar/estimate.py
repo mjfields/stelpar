@@ -77,7 +77,8 @@ class Estimate(object):
             use_synphot=False,
             zero_extinction=False, 
             walker_init_tol=1000, 
-            meas_phot_kwargs=None
+            meas_phot_kwargs=None,
+            pool=None
             ):
         
         ## setup target-specific metadata
@@ -236,7 +237,10 @@ class Estimate(object):
             
             self.log_prob_fn = self._prob.log_probability
         
-        self._pool = Pool()
+        if pool is None:
+            self._pool = Pool()
+        else:
+            self._pool = pool
         
         
         ## metadata parameters for output
