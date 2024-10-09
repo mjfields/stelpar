@@ -40,12 +40,11 @@ notebook = ["jupyter", "h5py"]
 readme = {file = ["README.md"]}
 
 [tool.setuptools]
-packages = ["stelpar"]
 package-dir = {"" = "src"}
+packages = ["stelpar"]
 
 [tool.setuptools.package-data]
-stelpar = ["*.py"]
-"stelpar.datafiles" = ["*"]
+stelpar = ["*.py", "datafiles/*"]
 
 [tool.pytest.ini_options]
 pythonpath = ["src"]
