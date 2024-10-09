@@ -7,4 +7,5 @@ A Python-based pipeline and analysis tool for estimating stellar parameters (par
 ## Installation
 
 The preferred method to install stelpar at the moment is
+
 `pip install git+https://github.com/mjfields/stelpar.git`
