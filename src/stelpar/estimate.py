@@ -7,6 +7,7 @@ import numpy as np
 import pandas as pd
 import time
 from datetime import datetime
+import os
 
 from multiprocessing import Pool
 from tqdm import tqdm
@@ -14,7 +15,16 @@ from contextlib import nullcontext
 
 import emcee
 
-from .config import MAGMODELPATH, INTERPMAGMODELPATH, STDMODELPATH, INTERPSTDMODELPATH, PARSECMODELPATH, GRIDCACHE
+from .config import (
+    MAGMODELPATH,
+    INTERPMAGMODELPATH,
+    STDMODELPATH,
+    INTERPSTDMODELPATH,
+    PARSECMODELPATH,
+    GRIDCACHEMAG,
+    GRIDCACHESTD,
+    GRIDCACHEPAR
+    )
 from .photometry import MeasuredPhotometry, SyntheticPhotometry
 from .simulation import Probability, MCMC
 from .target import Target
@@ -66,6 +76,11 @@ class Estimate(object):
     meas_phot_kwargs : dict, optional
         Keyword arguments to pass to `:class: stelpar.MeasuredPhotometry`.
         The default is `None`.
+    pool : `multiprocessing.Pool()` object or similar, optional. 
+        This only allows passing a user-controlled pool. 
+        Stelpar will try to parallelize regardless. The default is `None`.
+    clear_cache : bool, optional
+        Whether to clear the grid cache at runtime. The default is `True`.
     """
     
     def __init__(
@@ -78,7 +93,8 @@ class Estimate(object):
             zero_extinction=False, 
             walker_init_tol=1000, 
             meas_phot_kwargs=None,
-            pool=None
+            pool=None,
+            clear_cache=True
             ):
         
         ## setup target-specific metadata
@@ -108,6 +124,8 @@ class Estimate(object):
         
         
         if self._isochrone.lower() == 'mag':
+
+            gridcache = GRIDCACHEMAG
             
             if self._interp_method.lower() == 'true':
                 gridpath = MAGMODELPATH
@@ -116,6 +134,8 @@ class Estimate(object):
                 gridpath = INTERPMAGMODELPATH
         
         elif self._isochrone.lower() == 'std':
+
+            gridcache = GRIDCACHESTD
             
             if self._interp_method.lower() == 'true':
                 gridpath = STDMODELPATH
@@ -124,6 +144,8 @@ class Estimate(object):
                 gridpath = INTERPSTDMODELPATH
         
         elif self._isochrone.lower() == 'parsec':
+
+            gridcache = GRIDCACHEPAR
             
             if self._interp_method.lower() == 'true':
                 raise ValueError(
@@ -165,11 +187,16 @@ class Estimate(object):
                 isochrone_cols = None
                 self._masslist = grid.index.get_level_values('mass').drop_duplicates()
             
-            grid.to_pickle(GRIDCACHE)
+            ## if we want to clear the cache, check if it exists and delete file
+            if clear_cache:
+                if os.path.exists(gridcache):
+                    os.remove(gridcache)
+
+            grid.to_pickle(gridcache)
             
             del grid
             
-            self._model_grid = GRIDCACHE
+            self._model_grid = gridcache
             
             
         ## check if synphot is going to be used for the extinction calculation
