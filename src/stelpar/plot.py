@@ -3,6 +3,8 @@
 
 
 
+import warnings
+
 import numpy as np
 
 import matplotlib.pyplot as plt
@@ -22,7 +24,7 @@ from .utils import (
 
 
 
-def time_series(samples, savefile=None, show=True):
+def time_series(samples, savefile=None, show=True, alpha=0.4):
     
     """
     Makes a time-series plot of the fit parameters' positions.
@@ -56,7 +58,7 @@ def time_series(samples, savefile=None, show=True):
         p = labels.index.values[i]
             
         ax = axes[i]
-        ax.plot(samples[:, :, i], 'k', alpha=0.4)
+        ax.plot(samples[:, :, i], 'k', alpha=alpha)
         
         ax.set_xlim(0, len(samples))
         ax.set_ylabel(labels.loc[p])
@@ -191,15 +193,25 @@ def flux_v_wavelength(photometry, title=None, singlefig=True, savefile=None, sho
     
     med_flux = photometry['median_flux']
     med_flux_error = photometry['median_flux_error']
-    
-    max_flux = photometry['max_probability_flux']
-    max_flux_error = photometry['max_probability_flux_error']
-    
     med_frac_res = frac_res(obs_flux, med_flux)
-    max_frac_res = frac_res(obs_flux, max_flux)
-    
     med_frac_error = frac_res_error(obs_flux, obs_flux_error, med_flux, med_flux_error)
-    max_frac_error = frac_res_error(obs_flux, obs_flux_error, max_flux, max_flux_error)
+    
+    max_prob = True
+    try:
+        max_flux = photometry['max_probability_flux']
+        max_flux_error = photometry['max_probability_flux_error']
+        max_frac_res = frac_res(obs_flux, max_flux)
+        max_frac_error = frac_res_error(obs_flux, obs_flux_error, max_flux, max_flux_error)
+    except KeyError:
+        max_prob = False
+
+    if not singlefig and not max_prob:
+        warnings.warn(
+            "Unable to give 2-panel without max-probability values. "
+            "Next time, pass `max_prob=True` to `Estimate.posterior()`."
+        )
+        singlefig=True
+    
     
     
     mkrsize = 10
@@ -210,8 +222,8 @@ def flux_v_wavelength(photometry, title=None, singlefig=True, savefile=None, sho
     alpha = 1
     ylabel_coords = (-0.085, 0.5)
     
-    wav_label = r'$\mathbf{\\lambda} \\ \\left( \mathbf{\\mu}\mathrm{m} \\right)$'
-    flux_label = r'$\mathbf{F_{\\lambda}} \\ \\left( \mathrm{erg} \\ \mathrm{cm}\mathbf{^{-2}} \\ \mathrm{s}\mathbf{^{-1}} \\ \\AA\mathbf{^{-1}} \\right)$'
+    wav_label = r'$\mathbf{\lambda} \ \left( \mathbf{\mu}\mathrm{m} \right)$'
+    flux_label = r'$\mathbf{F_{\lambda}} \ \left( \mathrm{erg} \ \mathrm{cm}\mathbf{^{-2}} \ \mathrm{s}\mathbf{^{-1}} \ \AA\mathbf{^{-1}} \right)$'
     
     obs_color = 'black'
     med_color = 'mediumblue' # (0.35, 0.55, 0.35)
@@ -224,8 +236,6 @@ def flux_v_wavelength(photometry, title=None, singlefig=True, savefile=None, sho
     
     hcolor = 'black'
     hstyle = '--'
-    
-    
     
     if singlefig:
     
@@ -244,7 +254,7 @@ def flux_v_wavelength(photometry, title=None, singlefig=True, savefile=None, sho
             elinewidth=elinewidth,
             label='Observed',
             zorder=1
-            )
+        )
         
         ax1.errorbar(
             wav, 
@@ -260,22 +270,23 @@ def flux_v_wavelength(photometry, title=None, singlefig=True, savefile=None, sho
             label='Median',
             alpha=alpha,
             zorder=2
-            )
+        )
         
-        ax1.errorbar(
-            wav, 
-            max_flux, 
-            yerr=max_flux_error,
-            fmt='^',
-            markersize=mkrsize,
-            markeredgecolor=max_color, 
-            markerfacecolor=fill,
-            markeredgewidth=mkredgewidth,
-            ecolor=max_color,
-            elinewidth=elinewidth,
-            label='Max-Likelihood',
-            alpha=alpha,
-            zorder=3
+        if max_prob:
+            ax1.errorbar(
+                wav, 
+                max_flux, 
+                yerr=max_flux_error,
+                fmt='^',
+                markersize=mkrsize,
+                markeredgecolor=max_color, 
+                markerfacecolor=fill,
+                markeredgewidth=mkredgewidth,
+                ecolor=max_color,
+                elinewidth=elinewidth,
+                label='Max-Likelihood',
+                alpha=alpha,
+                zorder=3
             )
         
         ax1.tick_params(top=False, bottom=False, labelbottom=False, labeltop=False, direction='inout', length=10)
@@ -305,23 +316,24 @@ def flux_v_wavelength(photometry, title=None, singlefig=True, savefile=None, sho
             label='Median',
             alpha=alpha,
             zorder=1
-                      )
+        )
         
-        ax2.errorbar(
-            wav, 
-            max_frac_res, 
-            yerr=max_frac_error, 
-            fmt='^', 
-            markersize=mkrsize, 
-            markeredgecolor=max_res_color, 
-            markerfacecolor=fill, 
-            markeredgewidth=mkredgewidth,
-            ecolor=max_res_color,
-            elinewidth=elinewidth,
-            label='Max-Likelihood',
-            alpha=alpha,
-            zorder=2
-                      )
+        if max_prob:
+            ax2.errorbar(
+                wav, 
+                max_frac_res, 
+                yerr=max_frac_error, 
+                fmt='^', 
+                markersize=mkrsize, 
+                markeredgecolor=max_res_color, 
+                markerfacecolor=fill, 
+                markeredgewidth=mkredgewidth,
+                ecolor=max_res_color,
+                elinewidth=elinewidth,
+                label='Max-Likelihood',
+                alpha=alpha,
+                zorder=2
+            )
         
         ax2.tick_params(top=True, direction='inout', length=10)
         ax2.set_xlabel(wav_label)

@@ -219,20 +219,60 @@ def plot_labels(zero_extinction=False):
               'mass',
               'Av',
               'f',
-              'radius',
               'Teff',
+              'logg',
+              'logL',
+              'radius',
               'density'
               ]
     
     df = pd.DataFrame(index=params)
     
-    df.loc['age', ['label', 'fancy_label', 'fancy_label_unitless']] = 'age (Myr)', r'$\\tau_{\mathsf{\\star}} \, \mathrm{(Myr)}$', r'$\\tau_{\mathsf{\\star}}$'
-    df.loc['mass', ['label', 'fancy_label', 'fancy_label_unitless']] = 'mass (M_Sun)', r'$M_{\mathsf{\\star}} \, (\mathrm{M}_{\\odot})$', r'$M_{\mathsf{\\star}}$'
-    df.loc['Av', ['label', 'fancy_label', 'fancy_label_unitless']] = 'Av [mag]', r'$A_V \ \mathrm{[mag]}$', r'$A_V$'
-    df.loc['f', ['label', 'fancy_label', 'fancy_label_unitless']] = 'f [mag]', r'$f \ \mathrm{[mag]}$', r'$f$'
-    df.loc['radius', ['label', 'fancy_label', 'fancy_label_unitless']] = 'radius (R_Sun)', r'$R_{\mathsf{\\star}} \, (\mathrm{R}_{\\odot})$', r'$R_{\mathsf{\\star}}$'
-    df.loc['Teff', ['label', 'fancy_label', 'fancy_label_unitless']] = 'Teff (K)', r'$T_{\mathrm{eff}} \, \mathrm{(K)}$', r'$T_{\mathrm{eff}}$'
-    df.loc['density', ['label', 'fancy_label', 'fancy_label_unitless']] = 'density (M_Sun/R_Sun^3)', r'$\\rho_{\mathsf{\\star}} \, (\mathrm{M}_{\\odot}/{R_{\\odot}}^3)$', r'$\\rho_{\mathsf{\\star}}$)'
+    df.loc['age', ['label', 'fancy_label', 'fancy_label_unitless']] = (
+        'age (Myr)',
+        'age (Myr)',
+        'age',
+    )
+    df.loc['mass', ['label', 'fancy_label', 'fancy_label_unitless']] = (
+        'mass (M_Sun)',
+        r'$M_{\mathsf{\star}} \, (M_{\odot})$',
+        r'$M_{\mathsf{\star}}$'
+    )
+    df.loc['Av', ['label', 'fancy_label', 'fancy_label_unitless']] = (
+        'Av [mag]',
+        r'$A_V \, \mathrm{[mag]}$',
+        r'$A_V$'
+    )
+    df.loc['f', ['label', 'fancy_label', 'fancy_label_unitless']] = (
+        'f [mag]',
+        r'$f \, \mathrm{[mag]}$',
+        r'$f$'
+    )
+    df.loc['Teff', ['label', 'fancy_label', 'fancy_label_unitless']] = (
+        'Teff (K)',
+        r'$T_{\mathrm{eff}} \, \mathrm{(K)}$',
+        r'$T_{\mathrm{eff}}$'
+    )
+    df.loc['logg', ['label', 'fancy_label', 'fancy_label_unitless']] = (
+        'log(g) [log(cm/s^2)]',
+        r'$\log(g) \, [\log(\mathrm{cm} \, \mathrm{s}^{-2})]$',
+        r'$\log(g)$'
+    )
+    df.loc['logL', ['label', 'fancy_label', 'fancy_label_unitless']] = (
+        'log(L) [log(L_Sun)]',
+        r'$\log(L) \, [\log(L_{\odot})]$',
+        r'$\log(L)$'
+    )
+    df.loc['radius', ['label', 'fancy_label', 'fancy_label_unitless']] = (
+        'radius (R_Sun)',
+        r'$R_{\mathsf{\star}} \, (R_{\odot})$',
+        r'$R_{\mathsf{\star}}$'
+    )
+    df.loc['density', ['label', 'fancy_label', 'fancy_label_unitless']] = (
+        'density (M_Sun/R_Sun^3)',
+        r'$\rho_{\mathsf{\star}} \, (M_{\odot}/{R_{\odot}}^3)$',
+        r'$\rho_{\mathsf{\star}}$)'
+        )
     
     if zero_extinction:
         df.drop(index='Av', inplace=True)
