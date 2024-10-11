@@ -844,8 +844,10 @@ class EstimateResults(object):
             'mass' : 'M_Sun',
             'Av' : 'mag',
             'f' : 'mag',
-            'radius' : 'R_Sun',
             'Teff' : 'K',
+            'radius' : 'R_Sun',
+            'logg' : 'log(cm/s^2)',
+            'logL' : 'log(L_Sun)',
             'density' : 'M_Sun/R_Sun^3'
             }
         
@@ -904,7 +906,10 @@ class EstimateResults(object):
         else:
             params_info = '\n - stellar parameters:'
             for param in posterior.index:
-                params_info = params_info + f"\n   - {param}: {posterior.loc[param, 'max_probability']:.3g} +/- {posterior.loc[param, 'uncertainty']:.3g} {units[param]}"
+                params_info = params_info + (
+                    f"\n   - {param}: {posterior.loc[param, 'max_probability']:.3g} "
+                    f"+/- {posterior.loc[param, 'uncertainty']:.3g} {units[param]}"
+                    )
         
             
         
