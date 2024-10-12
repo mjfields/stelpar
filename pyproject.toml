@@ -46,6 +46,9 @@ packages = ["stelpar"]
 [tool.setuptools.package-data]
 stelpar = ["*.py", "datafiles/*", "datafiles/Filter_Profiles/*"]
 
+[tool.setuptools.exclude-package-data]
+stelpar = ["*__pycache__", "*.pyc"]
+
 [tool.pytest.ini_options]
 pythonpath = ["src"]
 addopts = ["--import-mode=importlib"]
