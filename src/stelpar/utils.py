@@ -9,7 +9,8 @@ import warnings
 import time
 import threading
 import logging
-import pickle
+from multiprocessing import shared_memory
+from contextlib import contextmanager
 
 from bisect import bisect_left
 from synphot import SpectralElement
@@ -395,16 +396,6 @@ def load_isochrone(filename):
             # converters={'age':Decimal, 'mass':Decimal}
             )
     
-
-
-
-def load_grid_pickle(filename):
-
-    with open(filename, 'rb') as f:
-        df = pickle.load(f)
-    
-    return df
-    
     
     
     
@@ -414,8 +405,7 @@ def interpolate_true(idx, grid, agelist=None, masslist=None):
     age, mass = idx
     
     if type(grid) is str:
-        # grid = pd.read_pickle(grid)
-        grid = load_grid_pickle(grid)
+        grid = pd.read_pickle(grid)
     
     interpolator = DFInterpolator(grid)
     
@@ -438,8 +428,7 @@ def interpolate_nearest(idx, grid, agelist=None, masslist=None):
     age, mass = idx
     
     if type(grid) is str:
-        # grid = pd.read_pickle(grid)
-        grid = load_grid_pickle(grid)
+        grid = pd.read_pickle(grid)
     
     df = pd.DataFrame(columns=grid.columns, index=pd.MultiIndex.from_product([[age], [mass]], names=('age', 'mass')), dtype=float)
     
@@ -496,8 +485,7 @@ def interpolate_hybrid(idx, grid, agelist=None, masslist=None):
     age, mass = idx
     
     if type(grid) is str:
-        # grid = pd.read_pickle(grid)
-        grid = load_grid_pickle(grid)
+        grid = pd.read_pickle(grid)
         
     df = pd.DataFrame(columns=grid.columns, index=pd.MultiIndex.from_product([[age], [mass]], names=('age', 'mass')), dtype=float)
     
