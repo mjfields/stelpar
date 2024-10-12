@@ -9,13 +9,9 @@ import warnings
 import time
 import threading
 import logging
-from multiprocessing import shared_memory
-from contextlib import contextmanager
 
 from bisect import bisect_left
 from synphot import SpectralElement
-from scipy.interpolate import interp1d
-from decimal import Decimal
 
 import astropy.units as u
 
