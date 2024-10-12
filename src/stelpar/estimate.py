@@ -21,9 +21,7 @@ from .config import (
     STDMODELPATH,
     INTERPSTDMODELPATH,
     PARSECMODELPATH,
-    GRIDCACHEMAG,
-    GRIDCACHESTD,
-    GRIDCACHEPAR
+    CACHEDIR
     )
 from .photometry import MeasuredPhotometry, SyntheticPhotometry
 from .simulation import Probability, MCMC
@@ -38,6 +36,19 @@ pd.options.display.float_format = '{:.6g}'.format
 
 
 __all__ = ['Estimate']
+
+
+
+
+def cleanup_cache_on_exception(method):
+    """Decorator to cleanup resources if an exception occurs."""
+    def wrapper(self, *args, **kwargs):
+        try:
+            return method(self, *args, **kwargs)
+        except Exception as e:
+            self.cleanup()  # Call the cleanup method
+            raise  # Optionally re-raise the exception
+    return wrapper
 
 
 
@@ -79,8 +90,6 @@ class Estimate(object):
     pool : `multiprocessing.Pool()` object or similar, optional. 
         This only allows passing a user-controlled pool. 
         Stelpar will try to parallelize regardless. The default is `None`.
-    clear_cache : bool, optional
-        Whether to clear the grid cache at runtime. The default is `True`.
     """
     
     def __init__(
@@ -94,7 +103,6 @@ class Estimate(object):
             walker_init_tol=1000, 
             meas_phot_kwargs=None,
             pool=None,
-            clear_cache=True
             ):
         
         ## setup target-specific metadata
@@ -121,11 +129,11 @@ class Estimate(object):
         
         self._isochrone = isochrone
         self._interp_method = interp_method
-        
+
         
         if self._isochrone.lower() == 'mag':
 
-            gridcache = GRIDCACHEMAG
+            gridcachefile = '.grid_cache_mag'
             
             if self._interp_method.lower() == 'true':
                 gridpath = MAGMODELPATH
@@ -135,7 +143,7 @@ class Estimate(object):
         
         elif self._isochrone.lower() == 'std':
 
-            gridcache = GRIDCACHESTD
+            gridcachefile = '.grid_cache_std'
             
             if self._interp_method.lower() == 'true':
                 gridpath = STDMODELPATH
@@ -145,7 +153,7 @@ class Estimate(object):
         
         elif self._isochrone.lower() == 'parsec':
 
-            gridcache = GRIDCACHEPAR
+            gridcachefile = '.grid_cache_par'
             
             if self._interp_method.lower() == 'true':
                 raise ValueError(
@@ -173,7 +181,7 @@ class Estimate(object):
             self._agelist = None
             self._masslist = None
         
-        if self._interp_method.lower() == 'nearest' or self._interp_method.lower() == 'hybrid':
+        elif self._interp_method.lower() == 'nearest' or self._interp_method.lower() == 'hybrid':
             with WaitingAnimation("loading isochrone model grid", delay=0.5):
                 grid = load_isochrone(gridpath)
                 print('')
@@ -187,113 +195,119 @@ class Estimate(object):
                 isochrone_cols = None
                 self._masslist = grid.index.get_level_values('mass').drop_duplicates()
             
-            ## if we want to clear the cache, check if it exists and delete file
-            if clear_cache:
-                if os.path.exists(gridcache):
-                    os.remove(gridcache)
+            
+            self._cachedir = CACHEDIR
 
+            gridcache = os.path.join(self._cachedir.name, gridcachefile)
+            
             grid.to_pickle(gridcache)
             
             del grid
             
             self._model_grid = gridcache
             
+
+        ## if an error occurs in any of this, clear the cache    
+        try:
+            ## check if synphot is going to be used for the extinction calculation
+        
+            self._use_synphot = use_synphot
             
-        ## check if synphot is going to be used for the extinction calculation
-        
-        self._use_synphot = use_synphot
-        
-        
-        ## check if extinction is going to be set to zero
-        
-        self._zero_extinction = zero_extinction
+            
+            ## check if extinction is going to be set to zero
+            
+            self._zero_extinction = zero_extinction
 
 
-        ## which parameters will be included in the final output
+            ## which parameters will be included in the final output
 
-        self._default_params = ['age', 'mass', 'Av', 'f', 'Teff', 'logg', 'logL', 'radius', 'density']
-        if include_params is not None:
+            self._default_params = ['age', 'mass', 'Av', 'f', 'Teff', 'logg', 'logL', 'radius', 'density']
+            if include_params is not None:
 
-            if not set(include_params).issubset(set(self._default_params)):
-                raise KeyError(
-                    "Invalid parameter(s) in `include_params`. "
-                    f"Possible parameters include {self._default_params}."
+                if not set(include_params).issubset(set(self._default_params)):
+                    raise KeyError(
+                        "Invalid parameter(s) in `include_params`. "
+                        f"Possible parameters include {self._default_params}."
+                        )
+                
+                self._params = include_params
+            
+            else:
+                self._params = self._default_params
+
+            if self._zero_extinction:
+                self._params = [p for p in self._params if p!='Av']
+            
+            
+            ## check the walker positions initialization tolerance
+            
+            self._walker_init_tol = walker_init_tol
+            
+            
+            ## handle any kwargs for MeasuredPhotometry
+            
+            if meas_phot_kwargs is None:
+                self._meas_phot_kwargs = dict()
+            else:
+                self._meas_phot_kwargs = meas_phot_kwargs
+                
+            
+            ## collect data, initialize classes, and setup functions
+            
+            self._mp = MeasuredPhotometry(self.target, self.coords, photometry_meta=self._phot_meta, isochrone_cols=isochrone_cols, **self._meas_phot_kwargs)
+            
+            self.photometry, self._termination_message = self._mp.get_data()
+            
+            if self.photometry is False:
+                self._sp, self._prob, self.log_prob_fn = False, False, False
+                
+            else:
+                self._sp = SyntheticPhotometry(
+                    self.photometry, 
+                    model_grid=self._model_grid, 
+                    interp_method=self._interp_method,
+                    extinction_kwargs={'use_synphot':self._use_synphot}, 
+                    interp_kwargs={'agelist':self._agelist, 'masslist':self._masslist}
                     )
+                
+                self._prob = Probability(self.photometry, self._sp.photometry_model, self._ic, zero_extinction=self._zero_extinction)
+                
+                self.log_prob_fn = self._prob.log_probability
             
-            self._params = include_params
-        
-        else:
-            self._params = self._default_params
-
-        if self._zero_extinction:
-            self._params = [p for p in self._params if p!='Av']
-        
-        
-        ## check the walker positions initialization tolerance
-        
-        self._walker_init_tol = walker_init_tol
-        
-        
-        ## handle any kwargs for MeasuredPhotometry
-        
-        if meas_phot_kwargs is None:
-            self._meas_phot_kwargs = dict()
-        else:
-            self._meas_phot_kwargs = meas_phot_kwargs
+            if pool is None:
+                self._pool = Pool()
+            else:
+                self._pool = pool
             
-        
-        ## collect data, initialize classes, and setup functions
-        
-        self._mp = MeasuredPhotometry(self.target, self.coords, photometry_meta=self._phot_meta, isochrone_cols=isochrone_cols, **self._meas_phot_kwargs)
-        
-        self.photometry, self._termination_message = self._mp.get_data()
-        
-        if self.photometry is False:
-            self._sp, self._prob, self.log_prob_fn = False, False, False
             
-        else:
-            self._sp = SyntheticPhotometry(
-                self.photometry, 
-                model_grid=self._model_grid, 
-                interp_method=self._interp_method,
-                extinction_kwargs={'use_synphot':self._use_synphot}, 
-                interp_kwargs={'agelist':self._agelist, 'masslist':self._masslist}
+            ## metadata parameters for output
+            
+            self._run_date = None
+            self._sim_runtime = None
+            self._posterior_extract_time = None
+            
+            
+            ## EstimateResults object to store results
+            
+            self.results = EstimateResults(
+                target=target,
+                options={
+                    'isochrone' : self._isochrone,
+                    'interp_method' : self._interp_method,
+                    'use_synphot' : self._use_synphot,
+                    'zero_extinction' : self._zero_extinction,
+                    'walker_init_tol' : self._walker_init_tol,
+                    'meas_phot_kwargs' : self._meas_phot_kwargs,
+                    }
                 )
-            
-            self._prob = Probability(self.photometry, self._sp.photometry_model, self._ic, zero_extinction=self._zero_extinction)
-            
-            self.log_prob_fn = self._prob.log_probability
         
-        if pool is None:
-            self._pool = Pool()
-        else:
-            self._pool = pool
-        
-        
-        ## metadata parameters for output
-        
-        self._run_date = None
-        self._sim_runtime = None
-        self._posterior_extract_time = None
-        
-        
-        ## EstimateResults object to store results
-        
-        self.results = EstimateResults(
-            target=target,
-            options={
-                'isochrone' : self._isochrone,
-                'interp_method' : self._interp_method,
-                'use_synphot' : self._use_synphot,
-                'zero_extinction' : self._zero_extinction,
-                'walker_init_tol' : self._walker_init_tol,
-                'meas_phot_kwargs' : self._meas_phot_kwargs,
-                }
-            )
+        except:
+            self.cleanup()
         
         
         
-        
+    
+    @cleanup_cache_on_exception
     def run(self, nwalkers, nsteps, progress=True, verbose=True, backend=None):
         """
         Wrapper for `stelpar.MCMC.run` which runs MCMC simulation using `emcee`.
@@ -383,7 +397,8 @@ class Estimate(object):
         
         
         
-        
+    
+    @cleanup_cache_on_exception
     def posterior(self, sampler, thin=1, discard=0, max_prob=False, force_true_interp=False, verbose=True):
         """
         Calculates full posterior distributions for the fit parameters and others, including radius, Teff, and density. 
@@ -467,7 +482,7 @@ class Estimate(object):
                 if self._isochrone.lower() == 'mag':
                     grid = load_isochrone(MAGMODELPATH)
                     
-                if self._isochrone.lower() == 'std':
+                elif self._isochrone.lower() == 'std':
                     grid = load_isochrone(STDMODELPATH)
                     
                 sp = SyntheticPhotometry(
@@ -641,7 +656,7 @@ class Estimate(object):
         
         
         
-        
+    
     def _max_log_probability(self, coords, progress=True):
         """
         Returns the maximum of the caluclated log probabilities and its index. 
@@ -749,6 +764,16 @@ class Estimate(object):
            
         
         return log_likelihood
+    
+
+    def __del__(self):
+
+        self.cleanup()
+    
+
+    def cleanup(self):
+
+        self._cachedir.cleanup()
     
     
     
