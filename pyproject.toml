@@ -28,6 +28,7 @@ dependencies = [
     "tqdm",
     "matplotlib",
     "corner",
+    "seaborn"
 ]
 dynamic = ["readme"]
 

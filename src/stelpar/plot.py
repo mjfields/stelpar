@@ -10,12 +10,14 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
 import corner
+import seaborn as sns
 
 from .utils import (
     plot_labels,
     phot_plot_labels,
     frac_res,
     frac_res_error,
+    frac_res_sigma,
     residual,
     sigma
     )
@@ -82,7 +84,7 @@ def time_series(samples, savefile=None, show=True, alpha=0.4):
     
     
     
-def corner_plot(chain, bins=20, r=None, corner_kwargs=None, savefile=None, show=True):
+def _corner_plot(chain, bins=20, r=None, corner_kwargs=None, savefile=None, show=True):
     
     """
     Creates a corner plot showing histograms and 2D projections of the stellar
@@ -159,6 +161,101 @@ def corner_plot(chain, bins=20, r=None, corner_kwargs=None, savefile=None, show=
 
 
 
+def corner_plot(
+        chains, 
+        savefile=None, 
+        show=True, 
+        nsamples=None, 
+        contour_fill_kws=None,
+        contour_outline_kws=None, 
+        diag_kws=None, 
+        grid_kws=None
+    ):
+    
+    """
+    Creates a corner plot showing smoothed histograms and 2D contours of the stellar
+    parameters.
+    
+    Parameters
+    ----------
+    chains : DataFrame
+        Contains the posterior distributions from which the corner plot will be made.
+    savefile : str, optional
+        The file location to save the figure. If `None` (default), will not save the figure.
+    show : bool, optional
+        If `True` (default), displays the figure.
+    nsamples : int, optional
+        The number of random samples to draw from the chains to make the plots.
+        If `None`, will use the full chains. The default is `None`.
+    {contour_fill, contour_outline, diag, grid}_kws : dicts, optional
+        Dictionaries of keyword arguments. See seaborn.pairplot and seaborn.PairGrid
+        for more information. The difference is here `plot_kws` is broken into "fill" and "outline"
+        keywords for more customization. See the `default_*_kws` below for an example.
+        The defaults are `None`.
+        
+    Returns
+    -------
+    grid : PairGrid
+        `seaborn.PairGrid` object which contains the plot elements.
+    
+    """
+
+    for param in chains.columns:
+        chains = chains.rename(
+            columns={
+                param : plot_labels().loc[param, 'fancy_label']
+            }
+        )
+    
+    rng = np.random.default_rng()
+    mask = rng.choice(np.arange(len(chains)), size=nsamples, replace=False)
+
+    ## setup grid
+    default_grid_kws = dict(corner=True, diag_sharey=False)
+    if grid_kws is None:
+        grid_kws = default_grid_kws
+    else:
+        grid_kws = {**default_grid_kws, **grid_kws}
+
+    grid = sns.PairGrid(chains.iloc[mask], **default_grid_kws)
+
+    ## contour fill
+    default_contour_fill_kws = dict(fill=True, color='gray', levels=4, cut=0)
+    if contour_fill_kws is None:
+        contour_fill_kws = default_contour_fill_kws
+    else:
+        contour_fill_kws = {**default_contour_fill_kws, **contour_fill_kws}
+    
+    grid.map_offdiag(sns.kdeplot, **contour_fill_kws)
+
+    ## contour outline
+    default_contour_outline_kws = dict(fill=False, color='black', levels=4, linewidths=3, cut=0)
+    if contour_outline_kws is None:
+        contour_outline_kws = default_contour_outline_kws
+    else:
+        contour_outline_kws = {**default_contour_outline_kws, **contour_outline_kws}
+    
+    grid.map_offdiag(sns.kdeplot, **contour_outline_kws)
+
+    ## diagonal posteriors
+    default_diag_kws = dict(fill=True, color='gray', edgecolor='black', linewidth=3, cut=0)
+    if diag_kws is None:
+        diag_kws = default_diag_kws
+    else:
+        diag_kws = {**default_diag_kws, **diag_kws}
+    grid.map_diag(sns.kdeplot, **diag_kws)
+
+    if savefile is not None:
+        grid.savefig(savefile)
+
+    if not show:
+        plt.close(grid.figure)
+
+    return grid
+
+
+
+
 def flux_v_wavelength(photometry, title=None, singlefig=True, savefile=None, show=True):
         
     """
@@ -193,15 +290,13 @@ def flux_v_wavelength(photometry, title=None, singlefig=True, savefile=None, sho
     
     med_flux = photometry['median_flux']
     med_flux_error = photometry['median_flux_error']
-    med_frac_res = frac_res(obs_flux, med_flux)
-    med_frac_error = frac_res_error(obs_flux, obs_flux_error, med_flux, med_flux_error)
+    med_frac_res = frac_res_sigma(obs_flux, obs_flux_error, med_flux, med_flux_error)
     
     max_prob = True
     try:
         max_flux = photometry['max_probability_flux']
         max_flux_error = photometry['max_probability_flux_error']
-        max_frac_res = frac_res(obs_flux, max_flux)
-        max_frac_error = frac_res_error(obs_flux, obs_flux_error, max_flux, max_flux_error)
+        max_frac_res = frac_res_sigma(obs_flux, obs_flux_error, max_flux, max_flux_error)
     except KeyError:
         max_prob = False
 
@@ -214,25 +309,25 @@ def flux_v_wavelength(photometry, title=None, singlefig=True, savefile=None, sho
     
     
     
-    mkrsize = 10
-    mkredgewidth = 2.5
-    elinewidth = 2.5
-    # capsize=7
-    # capthick=2.0
-    alpha = 1
+    mkrsize = 15
+    mkredgewidth = 2
+    elinewidth = 2
+    alpha = 0.7
     ylabel_coords = (-0.085, 0.5)
     
-    wav_label = r'$\mathbf{\lambda} \ \left( \mathbf{\mu}\mathrm{m} \right)$'
-    flux_label = r'$\mathbf{F_{\lambda}} \ \left( \mathrm{erg} \ \mathrm{cm}\mathbf{^{-2}} \ \mathrm{s}\mathbf{^{-1}} \ \AA\mathbf{^{-1}} \right)$'
+    wav_label = r'$\lambda \ \left( \mu\mathrm{m} \right)$'
+    flux_label = r'$F_{\lambda} \ \left( \mathrm{erg} \ \mathrm{cm}^{-2} \ \mathrm{s}^{-1} \ \AA^{-1} \right)$'
     
-    obs_color = 'black'
-    med_color = 'mediumblue' # (0.35, 0.55, 0.35)
-    max_color = 'green' # '#2de37f'
+    obs_color = 'gray'
+    med_color = 'navy' 
+    max_color = 'lightgreen' 
+
+    obs_marker = 'o'
+    med_marker = 's'
+    max_marker = 'd'
     
     med_res_color = med_color
     max_res_color = max_color
-    
-    fill = 'white'
     
     hcolor = 'black'
     hstyle = '--'
@@ -245,9 +340,9 @@ def flux_v_wavelength(photometry, title=None, singlefig=True, savefile=None, sho
             wav, 
             obs_flux, 
             yerr=obs_flux_error, 
-            fmt='o', 
+            fmt=obs_marker, 
             markersize=mkrsize, 
-            markeredgecolor=obs_color, 
+            markeredgecolor='black', 
             markerfacecolor=obs_color, 
             markeredgewidth=mkredgewidth, 
             ecolor=obs_color,
@@ -260,10 +355,10 @@ def flux_v_wavelength(photometry, title=None, singlefig=True, savefile=None, sho
             wav, 
             med_flux, 
             yerr=med_flux_error,
-            fmt='s',
+            fmt=med_marker,
             markersize=mkrsize,
-            markeredgecolor=med_color, 
-            markerfacecolor=fill,
+            markeredgecolor='black', 
+            markerfacecolor=med_color,
             markeredgewidth=mkredgewidth,
             ecolor=med_color,
             elinewidth=elinewidth,
@@ -277,10 +372,10 @@ def flux_v_wavelength(photometry, title=None, singlefig=True, savefile=None, sho
                 wav, 
                 max_flux, 
                 yerr=max_flux_error,
-                fmt='^',
+                fmt=max_marker,
                 markersize=mkrsize,
-                markeredgecolor=max_color, 
-                markerfacecolor=fill,
+                markeredgecolor='black', 
+                markerfacecolor=max_color,
                 markeredgewidth=mkredgewidth,
                 ecolor=max_color,
                 elinewidth=elinewidth,
@@ -297,7 +392,7 @@ def flux_v_wavelength(photometry, title=None, singlefig=True, savefile=None, sho
         handles, labels = ax1.get_legend_handles_labels()
         handles = [h[0] for h in handles]
         
-        ax1.legend(handles, labels)
+        ax1.legend(handles, labels, labelspacing=1.5, borderpad=1)
         
         
         ax2.axhline(y=0, c=hcolor, linestyle=hstyle, zorder=0)
@@ -305,11 +400,10 @@ def flux_v_wavelength(photometry, title=None, singlefig=True, savefile=None, sho
         ax2.errorbar(
             wav, 
             med_frac_res, 
-            yerr=med_frac_error, 
-            fmt='s', 
+            fmt=med_marker, 
             markersize=mkrsize, 
-            markeredgecolor=med_res_color, 
-            markerfacecolor=fill, 
+            markeredgecolor='black', 
+            markerfacecolor=med_color, 
             markeredgewidth=mkredgewidth,
             ecolor=med_res_color,
             elinewidth=elinewidth,
@@ -321,12 +415,11 @@ def flux_v_wavelength(photometry, title=None, singlefig=True, savefile=None, sho
         if max_prob:
             ax2.errorbar(
                 wav, 
-                max_frac_res, 
-                yerr=max_frac_error, 
-                fmt='^', 
+                max_frac_res,
+                fmt=max_marker, 
                 markersize=mkrsize, 
-                markeredgecolor=max_res_color, 
-                markerfacecolor=fill, 
+                markeredgecolor='black', 
+                markerfacecolor=max_color, 
                 markeredgewidth=mkredgewidth,
                 ecolor=max_res_color,
                 elinewidth=elinewidth,
@@ -337,8 +430,11 @@ def flux_v_wavelength(photometry, title=None, singlefig=True, savefile=None, sho
         
         ax2.tick_params(top=True, direction='inout', length=10)
         ax2.set_xlabel(wav_label)
-        ax2.set_ylabel('Fractional\nResidual')
+        ax2.set_ylabel('Fractional\nResidual '+r'($\sigma$)')
         ax2.yaxis.set_label_coords(*ylabel_coords)
+
+        res_ylim = ax2.get_ylim()
+        ax2.set_ylim(*np.array(res_ylim)+np.array([-1, 1]))
         
         
         
@@ -350,9 +446,9 @@ def flux_v_wavelength(photometry, title=None, singlefig=True, savefile=None, sho
             wav, 
             obs_flux, 
             yerr=obs_flux_error, 
-            fmt='o', 
+            fmt=obs_marker, 
             markersize=mkrsize, 
-            markeredgecolor=obs_color, 
+            markeredgecolor='black', 
             markerfacecolor=obs_color, 
             markeredgewidth=mkredgewidth, 
             ecolor=obs_color,
@@ -365,10 +461,10 @@ def flux_v_wavelength(photometry, title=None, singlefig=True, savefile=None, sho
             wav, 
             med_flux, 
             yerr=med_flux_error,
-            fmt='s',
+            fmt=med_marker,
             markersize=mkrsize,
-            markeredgecolor=med_color, 
-            markerfacecolor=fill,
+            markeredgecolor='black', 
+            markerfacecolor=med_color,
             markeredgewidth=mkredgewidth,
             ecolor=med_color,
             elinewidth=elinewidth,
@@ -386,41 +482,41 @@ def flux_v_wavelength(photometry, title=None, singlefig=True, savefile=None, sho
         handles, labels = ax1.get_legend_handles_labels()
         handles = [h[0] for h in handles]
         
-        ax1.legend(handles, labels)
+        ax1.legend(handles, labels, labelspacing=1.5, borderpad=1)
         
         
         ax3.axhline(y=0, c=hcolor, linestyle=hstyle, zorder=0)
         
         ax3.errorbar(
             wav, 
-            med_frac_res, 
-            yerr=med_frac_error, 
-            fmt='s', 
+            med_frac_res,
+            fmt=med_marker, 
             markersize=mkrsize, 
-            markeredgecolor=med_res_color, 
-            markerfacecolor=fill, 
+            markeredgecolor='black', 
+            markerfacecolor=med_color, 
             markeredgewidth=mkredgewidth,
             ecolor=med_res_color,
             elinewidth=elinewidth,
             label='Median',
             alpha=alpha
-                      )
+            )
         
         ax3.tick_params(top=True, direction='inout', length=10)
         ax3.set_xlabel(wav_label)
-        ax3.set_ylabel('Fractional\nResidual')
+        ax3.set_ylabel('Fractional\nResidual '+r'($\sigma$)')
         ax3.yaxis.set_label_coords(*ylabel_coords)
-        
+
         res_ylim = ax3.get_ylim()
+        ax3.set_ylim(*np.array(res_ylim)+np.array([-1, 1]))
         
         
         ax2.errorbar(
             wav, 
             obs_flux, 
             yerr=obs_flux_error, 
-            fmt='o', 
+            fmt=obs_marker, 
             markersize=mkrsize, 
-            markeredgecolor=obs_color, 
+            markeredgecolor='black', 
             markerfacecolor=obs_color, 
             markeredgewidth=mkredgewidth, 
             ecolor=obs_color,
@@ -433,10 +529,10 @@ def flux_v_wavelength(photometry, title=None, singlefig=True, savefile=None, sho
             wav, 
             max_flux, 
             yerr=max_flux_error,
-            fmt='^',
+            fmt=max_marker,
             markersize=mkrsize,
-            markeredgecolor=max_color, 
-            markerfacecolor=fill,
+            markeredgecolor='black', 
+            markerfacecolor=max_color,
             markeredgewidth=mkredgewidth,
             ecolor=max_color,
             elinewidth=elinewidth,
@@ -455,32 +551,32 @@ def flux_v_wavelength(photometry, title=None, singlefig=True, savefile=None, sho
         handles, labels = ax2.get_legend_handles_labels()
         handles = [h[0] for h in handles]
         
-        ax2.legend(handles, labels)
+        ax2.legend(handles, labels, labelspacing=1.5, borderpad=1)
                 
         
         ax4.axhline(y=0, c=hcolor, linestyle=hstyle, zorder=0)
         
         ax4.errorbar(
             wav, 
-            max_frac_res, 
-            yerr=max_frac_error, 
-            fmt='^', 
+            max_frac_res,
+            fmt=max_marker, 
             markersize=mkrsize, 
-            markeredgecolor=max_res_color, 
-            markerfacecolor=fill, 
+            markeredgecolor='black', 
+            markerfacecolor=max_color, 
             markeredgewidth=mkredgewidth,
             ecolor=max_res_color,
             elinewidth=elinewidth,
             label='Max-Likelihood',
             alpha=alpha
-                      )
+            )
         
         ax4.tick_params(top=True, direction='inout', length=10)
         ax4.set_xlabel(wav_label)
-        ax4.set_ylabel('Fractional\nResidual')
+        ax4.set_ylabel('Fractional\nResidual '+r'($\sigma$)')
         ax4.yaxis.set_label_coords(*ylabel_coords)
         
-        ax4.set_ylim(res_ylim)
+        res_ylim = ax4.get_ylim()
+        ax4.set_ylim(*np.array(res_ylim)+np.array([-1, 1]))
         
         
         
