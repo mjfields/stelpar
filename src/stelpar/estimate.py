@@ -932,7 +932,7 @@ class EstimateResults(object):
             params_info = '\n - stellar parameters:'
             for param in posterior.index:
                 params_info = params_info + (
-                    f"\n   - {param}: {posterior.loc[param, 'max_probability']:.3g} "
+                    f"\n   - {param}: {posterior.loc[param, 'median']:.3g} "
                     f"+/- {posterior.loc[param, 'uncertainty']:.3g} {units[param]}"
                     )
         
