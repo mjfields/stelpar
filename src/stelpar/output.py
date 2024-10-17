@@ -24,7 +24,15 @@ def store_output(obj, collection=None, destination=None, notes=None, str_to_txt=
     else:
         destination = os.path.abspath(destination)
         
-    
+        
+    date = datetime.today().strftime('%Y%m%d')
+
+
+    if obj.sampler == False:
+        success_flag = False
+    else:
+        success_flag = True
+
     target = obj.target
         
     if isinstance(target, Target):
@@ -34,9 +42,6 @@ def store_output(obj, collection=None, destination=None, notes=None, str_to_txt=
     else:
         target_name = target.replace(' ', '')
         target_logname = target.replace(' ', '')
-        
-        
-    date = datetime.today().strftime('%Y%m%d')
         
     
     if collection is not None:
@@ -64,9 +69,9 @@ def store_output(obj, collection=None, destination=None, notes=None, str_to_txt=
             break
         
         
-        with open(filepath, 'wb') as f:
-            
-            pickle.dump(obj, f)
+        if success_flag:
+            with open(filepath, 'wb') as f:
+                pickle.dump(obj, f)
         
 
         logfile = os.path.join(destination, collection, r'_log.txt')
@@ -91,7 +96,14 @@ def store_output(obj, collection=None, destination=None, notes=None, str_to_txt=
             log.update(pd.DataFrame([date], index=pd.Index([target_logname], name='target'), columns=['date']))
         
         else:
-            log = log.append(pd.DataFrame([date], index=pd.Index([target_logname], name='target'), columns=['date']))
+            # append depricated
+            # log = log.append(pd.DataFrame([date], index=pd.Index([target_logname], name='target'), columns=['date']))
+            log = pd.concat(
+                [
+                    log,
+                    pd.DataFrame([date], index=pd.Index([target_logname], name='target'), columns=['date'])
+                ]
+            )
         
         
         np.savetxt(logfile, log.reset_index().values, header=f"Most recent run date (YYYYMMDD) for each target. Updated {datetime.today().strftime('%Y-%m-%d')} (YYYY-MM-DD). \n", fmt='%s', delimiter='\t')
@@ -120,9 +132,9 @@ def store_output(obj, collection=None, destination=None, notes=None, str_to_txt=
             break
         
         
-        with open(filepath, 'wb') as f:
-            
-            pickle.dump(obj, f)
+        if success_flag:
+            with open(filepath, 'wb') as f:
+                pickle.dump(obj, f)
             
     
     if notes is not None:
@@ -138,6 +150,8 @@ def store_output(obj, collection=None, destination=None, notes=None, str_to_txt=
             
     
     return filepath
+
+
 
 
 
