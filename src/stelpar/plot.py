@@ -9,14 +9,13 @@ import numpy as np
 
 import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
+import matplitlib.colors as mplcol
 import corner
 import seaborn as sns
 
 from .utils import (
     plot_labels,
     phot_plot_labels,
-    frac_res,
-    frac_res_error,
     frac_res_sigma,
     residual,
     sigma
@@ -319,8 +318,8 @@ def flux_v_wavelength(photometry, title=None, singlefig=True, savefile=None, sho
     flux_label = r'$F_{\lambda} \ \left( \mathrm{erg} \ \mathrm{cm}^{-2} \ \mathrm{s}^{-1} \ \AA^{-1} \right)$'
     
     obs_color = 'gray'
-    med_color = 'navy' 
-    max_color = 'lightgreen' 
+    med_color = (*mplcol.to_rgb('navy'), alpha) 
+    max_color = (*mplcol.to_rgb('lightgreen'), alpha) 
 
     obs_marker = 'o'
     med_marker = 's'
@@ -363,7 +362,6 @@ def flux_v_wavelength(photometry, title=None, singlefig=True, savefile=None, sho
             ecolor=med_color,
             elinewidth=elinewidth,
             label='Median',
-            alpha=alpha,
             zorder=2
         )
         
@@ -380,7 +378,6 @@ def flux_v_wavelength(photometry, title=None, singlefig=True, savefile=None, sho
                 ecolor=max_color,
                 elinewidth=elinewidth,
                 label='Max-Likelihood',
-                alpha=alpha,
                 zorder=3
             )
         
@@ -408,7 +405,6 @@ def flux_v_wavelength(photometry, title=None, singlefig=True, savefile=None, sho
             ecolor=med_res_color,
             elinewidth=elinewidth,
             label='Median',
-            alpha=alpha,
             zorder=1
         )
         
@@ -424,7 +420,6 @@ def flux_v_wavelength(photometry, title=None, singlefig=True, savefile=None, sho
                 ecolor=max_res_color,
                 elinewidth=elinewidth,
                 label='Max-Likelihood',
-                alpha=alpha,
                 zorder=2
             )
         
@@ -498,7 +493,6 @@ def flux_v_wavelength(photometry, title=None, singlefig=True, savefile=None, sho
             ecolor=med_res_color,
             elinewidth=elinewidth,
             label='Median',
-            alpha=alpha
             )
         
         ax3.tick_params(top=True, direction='inout', length=10)
@@ -567,7 +561,6 @@ def flux_v_wavelength(photometry, title=None, singlefig=True, savefile=None, sho
             ecolor=max_res_color,
             elinewidth=elinewidth,
             label='Max-Likelihood',
-            alpha=alpha
             )
         
         ax4.tick_params(top=True, direction='inout', length=10)
