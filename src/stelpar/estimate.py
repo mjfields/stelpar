@@ -345,7 +345,7 @@ class Estimate(object):
             return False
         
         if verbose:
-            print(f"\nrunning MCMC for {self.target:s}:")
+            print(f"\nrunning MCMC for {self.target:s} ({self._isochrone:s}):")
             walker_context = WaitingAnimation("initializing walker positions", delay=0.5)
         else:
             walker_context = nullcontext()
@@ -444,7 +444,7 @@ class Estimate(object):
             return False, False, False
         
         if verbose:
-            print(f"\nextracting posterior for {self.target:s}:")
+            print(f"\nextracting posterior for {self.target:s} ({self._isochrone:s}):")
         
         samples = sampler.get_chain
             
