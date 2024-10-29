@@ -9,7 +9,7 @@ import numpy as np
 
 import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
-import matplitlib.colors as mplcol
+import matplotlib.colors as mplcol
 import corner
 import seaborn as sns
 
@@ -164,11 +164,14 @@ def corner_plot(
         chains, 
         savefile=None, 
         show=True, 
-        nsamples=None, 
+        nsamples=None,
         contour_fill_kws=None,
         contour_outline_kws=None, 
         diag_kws=None, 
-        grid_kws=None
+        grid_kws=None,
+        show_titles=False,
+        title_fmt='.2f',
+        title_kws=None,
     ):
     
     """
@@ -243,6 +246,17 @@ def corner_plot(
     else:
         diag_kws = {**default_diag_kws, **diag_kws}
     grid.map_diag(sns.kdeplot, **diag_kws)
+
+    if show_titles:
+        if title_kws is None:
+            title_kws = dict()
+        for label, chain, diag_ax in zip(chains.columns, chains.T.values, grid.diag_axes):
+            p = np.percentile(chain, [16, 50, 84])
+            q = np.diff(p)
+            diag_ax.set_title(
+                fr"${label.replace('$', '')} = {p[1]:{title_fmt}}_{{-{q[0]:{title_fmt}}}}^{{+{q[1]:{title_fmt}}}}$",
+                **title_kws
+            )
 
     if savefile is not None:
         grid.savefig(savefile)
