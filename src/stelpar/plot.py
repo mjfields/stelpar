@@ -209,8 +209,11 @@ def corner_plot(
             }
         )
     
-    rng = np.random.default_rng()
-    mask = rng.choice(np.arange(len(chains)), size=nsamples, replace=False)
+    if nsamples is None:
+        rng = np.random.default_rng()
+        mask = rng.choice(np.arange(len(chains)), size=nsamples, replace=False)
+    else:
+        mask = np.arange(len(chains))
 
     ## setup grid
     default_grid_kws = dict(corner=True, diag_sharey=False)
