@@ -194,6 +194,11 @@ def corner_plot(
         for more information. The difference is here `plot_kws` is broken into "fill" and "outline"
         keywords for more customization. See the `default_*_kws` below for an example.
         The defaults are `None`.
+    show_titles : bool, optional
+        Whether to show titles above each diagonal controlled by `title_{fmt, kws}`.
+        The default is `False`
+    title_fmt : str, optional
+        The 
         
     Returns
     -------
@@ -209,7 +214,7 @@ def corner_plot(
             }
         )
     
-    if nsamples is None:
+    if nsamples is not None:
         rng = np.random.default_rng()
         mask = rng.choice(np.arange(len(chains)), size=nsamples, replace=False)
     else:
