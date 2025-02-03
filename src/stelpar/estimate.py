@@ -46,7 +46,7 @@ def cleanup_cache_on_exception(method):
         try:
             return method(self, *args, **kwargs)
         except Exception as e:
-            self.cleanup()  # Call the cleanup method
+            self._cleanup()  # Call the cleanup method
             raise  # Optionally re-raise the exception
     return wrapper
 
@@ -130,6 +130,8 @@ class Estimate(object):
         self._isochrone = isochrone
         self._interp_method = interp_method
 
+        self._cachedir = CACHEDIR
+
         
         if self._isochrone.lower() == 'mag':
 
@@ -194,9 +196,6 @@ class Estimate(object):
             else:
                 isochrone_cols = None
                 self._masslist = grid.index.get_level_values('mass').drop_duplicates()
-            
-            
-            self._cachedir = CACHEDIR
 
             gridcache = os.path.join(self._cachedir.name, gridcachefile)
             
@@ -302,7 +301,7 @@ class Estimate(object):
                 )
         
         except:
-            self.cleanup()
+            self._cleanup()
         
         
         
@@ -768,10 +767,10 @@ class Estimate(object):
 
     def __del__(self):
 
-        self.cleanup()
+        self._cleanup()
     
 
-    def cleanup(self):
+    def _cleanup(self):
 
         self._cachedir.cleanup()
     
