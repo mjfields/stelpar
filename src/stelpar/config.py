@@ -2,7 +2,6 @@
 
 
 import os
-import tempfile
 
 
 
@@ -18,5 +17,3 @@ INTERPSTDMODELPATH = os.path.abspath(os.path.join(os.path.dirname(__file__), r'd
 PARSECMODELPATH = os.path.abspath(os.path.join(os.path.dirname(__file__), r'datafiles/parsec_grid.csv.gz'))
 
 FILTERPROFILESPATH = os.path.abspath(os.path.join(os.path.dirname(__file__), r'datafiles/Filter_Profiles'))
-
-CACHEDIR = tempfile.TemporaryDirectory()

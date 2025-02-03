@@ -12,6 +12,7 @@ import os
 from multiprocessing import Pool
 from tqdm import tqdm
 from contextlib import nullcontext
+import tempfile
 
 import emcee
 
@@ -20,8 +21,7 @@ from .config import (
     INTERPMAGMODELPATH,
     STDMODELPATH,
     INTERPSTDMODELPATH,
-    PARSECMODELPATH,
-    CACHEDIR
+    PARSECMODELPATH
     )
 from .photometry import MeasuredPhotometry, SyntheticPhotometry
 from .simulation import Probability, MCMC
@@ -130,7 +130,8 @@ class Estimate(object):
         self._isochrone = isochrone
         self._interp_method = interp_method
 
-        self._cachedir = CACHEDIR
+        # self._cachedir = CACHEDIR
+        self._cachedir = tempfile.TemporaryDirectory()
 
         
         if self._isochrone.lower() == 'mag':
