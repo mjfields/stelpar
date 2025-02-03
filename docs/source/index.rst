@@ -1,7 +1,7 @@
 stelpar
 ===================================
 
-**stelpar** is a **stel**lar **par**ameter estimation and analysis tool,
+**stelpar** is a stellar parameter estimation and analysis tool,
 primarily developed for young stars.
 
 .. note::
