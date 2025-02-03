@@ -1,0 +1,17 @@
+stelpar
+===================================
+
+**stelpar** is a **stel**lar **par**ameter estimation and analysis tool,
+primarily developed for young stars.
+
+.. note::
+
+   This project is under active development on `GitHub <https://github.com/mjfields/stelpar>`_.
+
+Contents
+--------
+
+.. toctree::
+
+   usage
+   api
