@@ -20,6 +20,9 @@ extensions = [
     'sphinx.ext.intersphinx',
 ]
 
+source_suffix = ".rst"
+master_doc = "index"
+
 intersphinx_mapping = {
     'python': ('https://docs.python.org/3/', None),
     'sphinx': ('https://www.sphinx-doc.org/en/master/', None),
