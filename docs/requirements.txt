@@ -6,3 +6,4 @@ astroquery
 synphot
 scipy
 dust_extinction
+pandas

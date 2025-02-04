@@ -39,7 +39,8 @@ autodoc_mock_imports = [
     'astroquery',
     'synphot',
     'scipy',
-    'dust_extinction'
+    'dust_extinction',
+    'pandas'
 ]
 
 # intersphinx_mapping = {
