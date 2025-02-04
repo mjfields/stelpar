@@ -4,3 +4,4 @@ isochrones
 astropy
 astroquery
 synphot
+scipy
