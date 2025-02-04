@@ -35,7 +35,8 @@ autosummary_ignore_module_all = True
 autodoc_mock_imports = [
     'numpy',
     'isochrones',
-
+    'astropy',
+    'astroquery'
 ]
 
 # intersphinx_mapping = {
