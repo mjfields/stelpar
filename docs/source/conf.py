@@ -30,7 +30,7 @@ extensions = [
 source_suffix = ".rst"
 master_doc = "index"
 
-viewcode_follow_imported_members = False
+viewcode_follow_imported_members = True
 autosummary_ignore_module_all = True
 autodoc_mock_imports = [
     'numpy',
