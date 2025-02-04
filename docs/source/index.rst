@@ -16,3 +16,4 @@ Contents
    :caption: User Guide
 
    ../guide/install
+   ../guide/estimate
