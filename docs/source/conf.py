@@ -29,6 +29,8 @@ extensions = [
 source_suffix = ".rst"
 master_doc = "index"
 
+autodoc_mock_imports = ['isochrones']
+
 # intersphinx_mapping = {
 #     'python': ('https://docs.python.org/3/', None),
 #     'sphinx': ('https://www.sphinx-doc.org/en/master/', None),
