@@ -36,6 +36,7 @@ autodoc_mock_imports = [
     'numpy',
     'isochrones',
     'astropy',
+    'astropy.units',
     'astroquery',
     'synphot',
     'scipy',
