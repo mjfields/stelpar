@@ -56,11 +56,12 @@ class MeasuredPhotometry(object):
         the name is used to query the object, otherwise, the coordinates are used.
     photometry_meta : DataFrame, optional
         The metadata used to access Vizier data and index DataFrames like `photometry`.
-    search_radius : float or `astropy.units.quantity.Quantity`, optional
-        The initial search radius for the Vizier query. Default is 5 arcseconds.
-    radius_step : float or `astropy.units.quantity.Quantity`, optional
+    search_radius : `None`, float, or `astropy.units.quantity.Quantity`, optional
+        The initial search radius for the Vizier query.
+        If `None`, default is 5 arcsecond.
+    radius_step : `None`, float, or `astropy.units.quantity.Quantity`, optional
         How much is the search radius decreased every query if it needs to be iterated?
-        Default is 1 arcsecond.
+        If `None`, default is 1 arcsecond.
     tol : int, optional
         Minimum number of magnitudes needed to run the simulation. Default is 0.
     lazy_tol : bool, optional
@@ -77,7 +78,18 @@ class MeasuredPhotometry(object):
         
     """
     
-    def __init__(self, name, coords=None, photometry_meta=None, search_radius=5*u.arcsec, radius_step=1*u.arcsec, tol=0, lazy_tol=False, vizier_kwargs=None, isochrone_cols=None):
+    def __init__(
+            self,
+            name,
+            coords=None,
+            photometry_meta=None,
+            search_radius=None,
+            radius_step=None,
+            tol=0,
+            lazy_tol=False,
+            vizier_kwargs=None,
+            isochrone_cols=None
+        ):
         
         self.name = name
         self.coords = coords
@@ -86,6 +98,11 @@ class MeasuredPhotometry(object):
             self._photometry_meta = photometry_meta.copy()
         else:
             self._photometry_meta = PhotometryMetadata().photometry.copy()
+
+        if search_radius is None:
+            search_radius = 5*u.arcsec
+        if radius_step is None:
+            radius_step = 1*u.arcsec
         
         if isinstance(radius_step, u.quantity.Quantity):
             self._radius_step = radius_step
