@@ -1,1 +1,1 @@
-sphinx-rst-theme
+sphinx-book-theme
