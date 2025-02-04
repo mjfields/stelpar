@@ -16,4 +16,4 @@ Contents
    :caption: User Guide
    :glob:
 
-   ../guide/*
+   guide/*
