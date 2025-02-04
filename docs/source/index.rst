@@ -16,4 +16,5 @@ Contents
    :caption: User Guide
    :glob:
 
-   guide/*
+   guide/install
+   guide/estimate
