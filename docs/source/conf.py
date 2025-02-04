@@ -35,17 +35,18 @@ intersphinx_mapping = {
 }
 intersphinx_disabled_domains = ['std']
 
-templates_path = ['templates']
+templates_path = ['_templates']
 
 # -- Options for HTML Output -----------------------------------------------------
 
 html_theme = "sphinx_book_theme"
+html_static_path = ["_static"]
 html_copy_source = True
 html_show_sourcelink = True
 html_sourcelink_suffix = ""
 html_title = "stelpar"
 html_theme_options = {
-    "path_to_docs": "docs",
+    # "path_to_docs": "docs/source",
     "repository_url": "https://github.com/mjfields/stelpar",
     "repository_branch": "main",
     "use_edit_page_button": True,
