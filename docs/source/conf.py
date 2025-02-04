@@ -40,7 +40,8 @@ autodoc_mock_imports = [
     'synphot',
     'scipy',
     'dust_extinction',
-    'pandas'
+    'pandas',
+    'numba'
 ]
 
 # intersphinx_mapping = {
