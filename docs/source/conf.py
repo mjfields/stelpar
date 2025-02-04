@@ -23,13 +23,14 @@ extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.autosummary',
     'sphinx.ext.intersphinx',
-    'sphinx.ext.napoleon'
+    'sphinx.ext.napoleon',
+    'sphinx.ext.viewcode'
 ]
 
 source_suffix = ".rst"
 master_doc = "index"
 
-autodoc_mock_imports = ['isochrones']
+viewcode_follow_imported_members = False
 
 # intersphinx_mapping = {
 #     'python': ('https://docs.python.org/3/', None),
