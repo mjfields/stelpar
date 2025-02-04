@@ -1,13 +1,8 @@
 sphinx-book-theme
 numpy
-numba
-pandas
-emcee>=3.0.0
+isochrones
+astropy
 astroquery
 synphot
+scipy
 dust_extinction
-isochrones
-tqdm
-matplotlib
-corner
-seaborn
