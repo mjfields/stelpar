@@ -2,7 +2,6 @@ import os
 import sys
 
 sys.path.insert(0, os.path.abspath('../../src'))
-print(os.path.abspath('../../src'))
 
 # -- Project Information -----------------------------------------------------
 
@@ -30,33 +29,33 @@ extensions = [
 source_suffix = ".rst"
 master_doc = "index"
 
-intersphinx_mapping = {
-    'python': ('https://docs.python.org/3/', None),
-    'sphinx': ('https://www.sphinx-doc.org/en/master/', None),
-}
-intersphinx_disabled_domains = ['std']
+# intersphinx_mapping = {
+#     'python': ('https://docs.python.org/3/', None),
+#     'sphinx': ('https://www.sphinx-doc.org/en/master/', None),
+# }
+# intersphinx_disabled_domains = ['std']
 
-templates_path = ['_templates']
+# templates_path = ['_templates']
 
 # -- Options for HTML Output -----------------------------------------------------
 
 html_theme = "sphinx_book_theme"
-html_static_path = ["_static"]
-html_copy_source = True
-html_show_sourcelink = True
-html_sourcelink_suffix = ""
-html_title = "stelpar"
-html_theme_options = {
-    "path_to_docs": "docs/source",
-    "repository_url": "https://github.com/mjfields/stelpar",
-    "repository_branch": "main",
-    "use_edit_page_button": True,
-    "use_issues_button": True,
-    "use_repository_button": True,
-    "use_download_button": True,
-}
-nb_execution_mode = "off"
-nb_execution_timeout = -1
+# html_static_path = ["_static"]
+# html_copy_source = True
+# html_show_sourcelink = True
+# html_sourcelink_suffix = ""
+# html_title = "stelpar"
+# html_theme_options = {
+#     "path_to_docs": "docs/source",
+#     "repository_url": "https://github.com/mjfields/stelpar",
+#     "repository_branch": "main",
+#     "use_edit_page_button": True,
+#     "use_issues_button": True,
+#     "use_repository_button": True,
+#     "use_download_button": True,
+# }
+# nb_execution_mode = "off"
+# nb_execution_timeout = -1
 
 # -- Options for EPUB Output -----------------------------------------------------
-epub_show_urls = 'footnote'
+# epub_show_urls = 'footnote'
