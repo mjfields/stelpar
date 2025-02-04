@@ -2,7 +2,6 @@ sphinx-book-theme
 numpy
 isochrones
 astropy
-astropy.units
 astroquery
 synphot
 scipy
