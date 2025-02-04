@@ -12,6 +12,7 @@ Contents
 --------
 
 .. toctree::
+   :maxdepth: 2
+   :caption: User Guide
 
-   usage
-   api
+   ../guide/install
