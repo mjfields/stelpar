@@ -33,12 +33,18 @@ master_doc = "index"
 viewcode_follow_imported_members = False
 autosummary_ignore_module_all = True
 autodoc_mock_imports = [
-    'numpy',
-    'isochrones',
-    'astropy',
-    'astroquery',
-    'synphot',
-    'scipy'
+    "numpy", 
+    "numba",
+    "pandas",
+    "emcee",
+    "astroquery",
+    "synphot",
+    "dust_extinction",
+    "isochrones",
+    "tqdm",
+    "matplotlib",
+    "corner",
+    "seaborn"
 ]
 
 # intersphinx_mapping = {
