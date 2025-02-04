@@ -46,7 +46,7 @@ html_show_sourcelink = True
 html_sourcelink_suffix = ""
 html_title = "stelpar"
 html_theme_options = {
-    # "path_to_docs": "docs/source",
+    "path_to_docs": "docs/source",
     "repository_url": "https://github.com/mjfields/stelpar",
     "repository_branch": "main",
     "use_edit_page_button": True,
