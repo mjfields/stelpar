@@ -14,6 +14,6 @@ Contents
 .. toctree::
    :maxdepth: 2
    :caption: User Guide
+   :glob:
 
-   ../guide/install
-   ../guide/estimate
+   ../guide/*
