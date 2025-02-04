@@ -34,6 +34,21 @@ templates_path = ['templates']
 # -- Options for HTML Output -----------------------------------------------------
 
 html_theme = "sphinx_book_theme"
+html_copy_source = True
+html_show_sourcelink = True
+html_sourcelink_suffix = ""
+html_title = "stelpar"
+html_theme_options = {
+    "path_to_docs": "docs",
+    "repository_url": "https://github.com/mjfields/stelpar",
+    "repository_branch": "main",
+    "use_edit_page_button": True,
+    "use_issues_button": True,
+    "use_repository_button": True,
+    "use_download_button": True,
+}
+nb_execution_mode = "off"
+nb_execution_timeout = -1
 
 # -- Options for EPUB Output -----------------------------------------------------
 epub_show_urls = 'footnote'
