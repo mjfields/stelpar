@@ -41,7 +41,8 @@ autodoc_mock_imports = [
     'scipy',
     'dust_extinction',
     'pandas',
-    'numba'
+    'numba',
+    'matplotlib'
 ]
 
 # intersphinx_mapping = {

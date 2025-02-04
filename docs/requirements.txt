@@ -8,3 +8,4 @@ scipy
 dust_extinction
 pandas
 numba
+matplotlib
