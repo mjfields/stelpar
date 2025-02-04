@@ -3,3 +3,4 @@ numpy
 isochrones
 astropy
 astroquery
+synphot

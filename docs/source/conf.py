@@ -36,7 +36,8 @@ autodoc_mock_imports = [
     'numpy',
     'isochrones',
     'astropy',
-    'astroquery'
+    'astroquery',
+    'synphot'
 ]
 
 # intersphinx_mapping = {
