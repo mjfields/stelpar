@@ -7,4 +7,3 @@ The main use of ``stelpar`` is to estimate stellar parameters using an :class:`E
 
 .. autoclass:: stelpar.Estimate
     :members:
-    :undoc-members:
