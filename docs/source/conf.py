@@ -65,6 +65,7 @@ html_favicon = "_static/stelpar_favicon.png"
 html_context = {
     'favicon' : "_static/stelpar_favicon.png"
 }
+html_logo = "_static/stelpar_favicon.png"
 html_theme_options = {
     "path_to_docs": "docs/source",
     "repository_url": "https://github.com/mjfields/stelpar",
