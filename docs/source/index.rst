@@ -18,3 +18,4 @@ Contents
 
    guide/install
    guide/estimate
+   guide/target
