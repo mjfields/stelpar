@@ -40,6 +40,7 @@ class Target(object):
           instance. Additional options (e.g., units) must be passed to
           `coord_kwargs`.
         - `astropy.coordinates.SkyCoord`: `coord_kwargs` is ignored.
+
         If `list-like` or `astropy.coordinates.SkyCoord`, these coordinates
         will be used to query photometry.
     coord_kwargs : optional
@@ -216,6 +217,7 @@ class Target(object):
               the value of the dictionary is 'all'.
             - Remove one or multiple bands: the value of the dictionary
               is the band keyword string or a list of such strings.
+              
             See the `Target` tutorial for an example.
         """
         return self._phot_meta.remove(photometry_dict)
