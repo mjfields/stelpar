@@ -13,6 +13,7 @@ from multiprocessing import Pool
 from tqdm import tqdm
 from contextlib import nullcontext
 import tempfile
+import functools
 
 import emcee
 
@@ -42,6 +43,7 @@ __all__ = ['Estimate']
 
 def cleanup_cache_on_exception(method):
     """Decorator to cleanup resources if an exception occurs."""
+    @functools.wraps(method)
     def wrapper(self, *args, **kwargs):
         try:
             return method(self, *args, **kwargs)
