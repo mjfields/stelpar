@@ -37,8 +37,8 @@ class Target(object):
         
         * ``None`` (default): `name` will be used to query photometry.
         * list-like object of the form (RA, DEC): will create a `SkyCoord`
-        instance. Additional options (e.g., units) must be passed to
-        `coord_kwargs`.
+          instance. Additional options (e.g., units) must be passed to
+          `coord_kwargs`.
         * `astropy.coordinates.SkyCoord`: `coord_kwargs` is ignored.
 
         If list-like or `astropy.coordinates.SkyCoord`, these coordinates
