@@ -51,7 +51,7 @@ intersphinx_mapping = {
 }
 intersphinx_disabled_domains = ['std']
 
-templates_path = ['_templates']
+templates_path = ["_templates"]
 
 # -- Options for HTML Output -----------------------------------------------------
 
@@ -62,6 +62,9 @@ html_sourcelink_suffix = ""
 html_title = "stelpar"
 html_static_path = ["_static"]
 html_favicon = "_static/stelpar_favicon.png"
+html_context = {
+    'favicon' : "_static/stelpar_favicon.png"
+}
 html_theme_options = {
     "path_to_docs": "docs/source",
     "repository_url": "https://github.com/mjfields/stelpar",
