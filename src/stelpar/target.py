@@ -90,7 +90,7 @@ class Target(object):
     def show_metadata(self):
         """
         Displays a collection of all the metadata associated with the
-        ``Target`` instance.
+        :class:`Target` instance.
         """
         
         try:
