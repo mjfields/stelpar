@@ -6,5 +6,5 @@ Estimate
 The main use of ``stelpar`` is to estimate stellar parameters using an :class:`Estimate` instance.
 
 .. autoclass:: stelpar.Estimate
-    :imported-members:
     :members:
+    :undoc-members:
