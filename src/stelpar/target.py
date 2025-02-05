@@ -33,19 +33,19 @@ class Target(object):
     name : str
         The target name. If ``coords=None``, the target name will be used when
         querying for photometry.
-    coords : None, `list-like`, or `astropy.coordinates.SkyCoord`; optional
-        Options include:
-        - ``None`` (default): `name` will be used to query photometry.
-        - `list-like` object of the form (RA, DEC): will create a `SkyCoord`
-          instance. Additional options (e.g., units) must be passed to
-          `coord_kwargs`.
-        - `astropy.coordinates.SkyCoord`: `coord_kwargs` is ignored.
+    coords : None, list-like, or astropy.coordinates.SkyCoord; optional
+        
+        * ``None`` (default): `name` will be used to query photometry.
+        * list-like object of the form (RA, DEC): will create a `SkyCoord`
+        instance. Additional options (e.g., units) must be passed to
+        `coord_kwargs`.
+        * `astropy.coordinates.SkyCoord`: `coord_kwargs` is ignored.
 
-        If `list-like` or `astropy.coordinates.SkyCoord`, these coordinates
+        If list-like or `astropy.coordinates.SkyCoord`, these coordinates
         will be used to query photometry.
     coord_kwargs : optional
         Any additional keyword arguments passed to `astropy.coordinates.SkyCoord`
-        when passing a `list-like` to `coords`.
+        when passing a list-like to `coords`.
     """
     
     def __init__(self, name, coords=None, **coord_kwargs):
@@ -212,13 +212,14 @@ class Target(object):
         ----------
         photometry_dict : dict
             A dictionary whose key is the catalog identifier(s).
-            For each catalog there are two options:
-            - Remove all photometry associated with that catalog:
-              the value of the dictionary is 'all'.
-            - Remove one or multiple bands: the value of the dictionary
+            For each catalog there are two options.
+
+            * Remove all photometry associated with that catalog:
+              the value of the dictionary is "all".
+            * Remove one or multiple bands: the value of the dictionary
               is the band keyword string or a list of such strings.
-              
-            See the `Target` tutorial for an example.
+            
+            See the Target tutorial for an example.
         """
         return self._phot_meta.remove(photometry_dict)
             
