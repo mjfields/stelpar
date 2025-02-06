@@ -25,7 +25,8 @@ extensions = [
     'sphinx.ext.intersphinx',
     'sphinx.ext.napoleon',
     'sphinx.ext.viewcode',
-    'sphinx.ext.myst_nb'
+    'myst_nb',
+    'IPython.spinxext.ipython_console_highlighting'
 ]
 
 source_suffix = ".rst"
