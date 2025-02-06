@@ -20,7 +20,9 @@ Contents
    guide/target
 
 .. toctree::
-   :maxdepth: 1
+   :maxdepth: 2
    :caption: Tutorials
 
    tutorials/quickstart
+   tutorials/target_priors_photometry
+   tutorials/mcmc_options
