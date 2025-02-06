@@ -64,7 +64,7 @@ html_sourcelink_suffix = ""
 html_title = "stelpar"
 html_static_path = ["_static"]
 html_favicon = "_static/stelpar_favicon.ico"
-html_logo = "_static/stelpar_favicon.png"
+html_logo = "_static/stelpar_favicon.svg"
 html_theme_options = {
     "path_to_docs": "docs/source",
     "repository_url": "https://github.com/mjfields/stelpar",
