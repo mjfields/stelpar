@@ -75,7 +75,10 @@ html_theme_options = {
     "use_download_button": True,
     "logo" : {
         "text" : f"stelpar ({version})"
-    }
+    },
+    "show_navbar_depth": 2,
+    "collapse_navigation": True,
+    "sticky_navigation": True
 }
 nb_execution_mode = "off"
 nb_execution_timeout = -1
