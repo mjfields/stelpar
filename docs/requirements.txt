@@ -9,5 +9,5 @@ dust_extinction
 pandas
 numba
 matplotlib
-myst_nb
+myst-nb
 ipython
