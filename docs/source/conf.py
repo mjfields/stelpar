@@ -24,7 +24,8 @@ extensions = [
     'sphinx.ext.autosummary',
     'sphinx.ext.intersphinx',
     'sphinx.ext.napoleon',
-    'sphinx.ext.viewcode'
+    'sphinx.ext.viewcode',
+    'myst_nb'
 ]
 
 source_suffix = ".rst"
@@ -72,7 +73,7 @@ html_theme_options = {
     "use_repository_button": True,
     "use_download_button": True,
     "logo" : {
-        "text" : "stelpar"
+        "text" : f"stelpar\n{version}"
     }
 }
 nb_execution_mode = "off"
