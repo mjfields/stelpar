@@ -74,7 +74,7 @@ html_theme_options = {
     "use_repository_button": True,
     "use_download_button": True,
     "logo" : {
-        "text" : f"stelpar\n{version}"
+        "text" : f"stelpar ({version})"
     }
 }
 nb_execution_mode = "off"
