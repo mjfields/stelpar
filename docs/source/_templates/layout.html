@@ -1,19 +1,10 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ title }}</title>
+{% extends "!layout.html" %}
+
+{% block extrahead %}
+    {{ super() }}
+
     <!-- Favicon link -->
     <link rel="shortcut icon" href="/_static/stelpar_favicon.png" type="image/x-icon">
     <link rel="shortcut icon" href="/_static/stelpar_favicon.svg" type="image/x-icon">
-    {{ html_meta }}
-    {{ head }}
-</head>
-<body>
-    <div id="content">
-        {{ content }}
-    </div>
-    {{ footer }}
-</body>
-</html>
+    
+{% endblock extrahead %}
