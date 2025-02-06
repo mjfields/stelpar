@@ -25,7 +25,7 @@ extensions = [
     'sphinx.ext.intersphinx',
     'sphinx.ext.napoleon',
     'sphinx.ext.viewcode',
-    'myst_nb'
+    'sphinx.ext.myst_nb'
 ]
 
 source_suffix = ".rst"
