@@ -10,3 +10,4 @@ pandas
 numba
 matplotlib
 myst_nb
+ipython
