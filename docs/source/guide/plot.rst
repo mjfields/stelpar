@@ -5,4 +5,4 @@ Plots
 
 The following are built-in plotting functions using :module:`matplotlib, seaborn`.
 
-.. automodule:: stelpar.plot.corner_plot
+.. autofunction:: stelpar.plot.corner_plot
