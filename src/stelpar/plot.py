@@ -189,7 +189,7 @@ def corner_plot(
     nsamples : int, optional
         The number of random samples to draw from the chains to make the plots.
         If `None`, will use the full chains. The default is `None`.
-    {contour_fill, contour_outline, diag, grid}_kws : dicts, optional
+    {{contour_fill, contour_outline, diag, grid}}_kws : dicts, optional
         Dictionaries of keyword arguments. See seaborn.pairplot and seaborn.PairGrid
         for more information. The difference is here `plot_kws` is broken into "fill" and "outline"
         keywords for more customization. See the `default_*_kws` below for an example.
