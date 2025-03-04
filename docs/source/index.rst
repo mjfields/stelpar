@@ -18,6 +18,7 @@ Contents
    guide/install
    guide/estimate
    guide/target
+   guide/plot
 
 .. toctree::
    :maxdepth: 2
