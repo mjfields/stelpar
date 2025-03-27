@@ -12,7 +12,7 @@ except ModuleNotFoundError:
 
 from astropy.coordinates import SkyCoord
 
-from .metadata import InitialConditions, Moves, PhotometryMetadata
+from .metadata import InitialConditions, Parallax, Moves, PhotometryMetadata
 
 
 
@@ -68,6 +68,7 @@ class Target(object):
             self._dec = ''
         
         self._ic = InitialConditions()
+        self._plx = Parallax()
         self._moves = Moves()
         self._phot_meta = PhotometryMetadata()
         
@@ -139,6 +140,26 @@ class Target(object):
         
         for key in ic:
             setattr(self._ic, key, ic[key])
+
+
+
+    @property
+    def plx(self):
+        """
+        The (parallax, error) pair given in arcsec.
+        If the user provides a parallax and error, `plx` will be
+        a 1-dimensional list-like with two values. Otherwise,
+        `plx` will be `None`.
+        """
+
+        return self._plx.value
+    
+
+
+    @plx.setter
+    def plx(self, arr):
+        
+        setattr(self._plx, 'value', arr)
             
             
             

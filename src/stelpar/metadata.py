@@ -14,7 +14,7 @@ from astropy.table import Table
 
 
 
-__all__ = ['InitialConditions', 'Moves', 'PhotometryMetadata', 'MetaDataFrame']
+__all__ = ['InitialConditions', 'Parallax', 'Moves', 'PhotometryMetadata', 'MetaDataFrame']
 
 
 
@@ -186,8 +186,44 @@ class InitialConditions(object):
         new_conds = self._default_initial_conditions.loc[params, conds].copy()
         
         self.initial_conditions.update(new_conds)
-            
-            
+
+
+
+
+class Parallax(object):
+
+    """
+    Allows the user to provide a (parallax, error) pair if it cannot be found by Gaia.
+    Parallax and error should be given in arcsec.
+
+    """
+
+    def __init__(self):
+
+        self._default_plx = None
+        self._plx = self._default_plx
+
+    @property
+    def value(self):
+
+        return self._plx
+    
+    @value.setter
+    def value(self, arr):
+
+        if len(arr) != 2 or np.array(arr).ndim != 1:
+            raise ValueError(
+                "Parallax must be given as a 1-dimensional (plx, err) list-like. \
+                    Don't forget to include an error!"
+            )
+
+        self._plx = arr
+
+    def reset(self):
+
+        self._plx = self._default_plx
+    
+
             
             
 class Moves(object):

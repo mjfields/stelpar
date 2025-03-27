@@ -27,7 +27,7 @@ from .config import (
 from .photometry import MeasuredPhotometry, SyntheticPhotometry
 from .simulation import Probability, MCMC
 from .target import Target
-from .metadata import InitialConditions, Moves, PhotometryMetadata, MetaDataFrame
+from .metadata import InitialConditions, Parallax, Moves, PhotometryMetadata, MetaDataFrame
 from .utils import app_mag, app_mag_error, mag_to_flux, load_isochrone, WaitingAnimation, sigma
 
 
@@ -115,6 +115,7 @@ class Estimate(object):
             self.coords = target.coords
             
             self._ic = target.initial_conditions.loc[self.target].copy()
+            self._user_plx = target.plx
             self._moves = target.moves
             self._phot_meta = target.photometry_meta.copy()
             
@@ -123,6 +124,7 @@ class Estimate(object):
             self.coords = None
             
             self._ic = InitialConditions().initial_conditions.copy()
+            self._user_plx = Parallax().value
             self._moves = Moves().moves
             self._phot_meta = PhotometryMetadata().photometry.copy()
             
@@ -256,7 +258,14 @@ class Estimate(object):
             
             ## collect data, initialize classes, and setup functions
             
-            self._mp = MeasuredPhotometry(self.target, self.coords, photometry_meta=self._phot_meta, isochrone_cols=isochrone_cols, **self._meas_phot_kwargs)
+            self._mp = MeasuredPhotometry(
+                self.target,
+                self.coords,
+                photometry_meta=self._phot_meta,
+                user_plx=self._user_plx,
+                isochrone_cols=isochrone_cols,
+                **self._meas_phot_kwargs
+            )
             
             self.photometry, self._termination_message = self._mp.get_data()
             

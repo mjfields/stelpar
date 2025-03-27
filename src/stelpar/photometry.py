@@ -56,6 +56,10 @@ class MeasuredPhotometry(object):
         the name is used to query the object, otherwise, the coordinates are used.
     photometry_meta : DataFrame, optional
         The metadata used to access Vizier data and index DataFrames like `photometry`.
+    user_plx : list-like, optional
+        A (parallax, error) pair given in arcsec. If provided, these values will be used
+        to convert photometry from apparent to absolute magnitudes.
+        If `None` (default), will rely on Gaia or Simbad to find parallax
     search_radius : `None`, float, or `astropy.units.quantity.Quantity`, optional
         The initial search radius for the Vizier query.
         If `None`, default is 5 arcsecond.
@@ -83,6 +87,7 @@ class MeasuredPhotometry(object):
             name,
             coords=None,
             photometry_meta=None,
+            user_plx=None,
             search_radius=None,
             radius_step=None,
             tol=0,
@@ -98,6 +103,8 @@ class MeasuredPhotometry(object):
             self._photometry_meta = photometry_meta.copy()
         else:
             self._photometry_meta = PhotometryMetadata().photometry.copy()
+        
+        self._user_plx = user_plx
 
         if search_radius is None:
             search_radius = 5*u.arcsec
@@ -361,18 +368,20 @@ class MeasuredPhotometry(object):
                     if i not in self._isochrone_cols:
                         photometry.drop(index=i, inplace=True)
             
-            
-            # if Vizier didn't have a parallax or parallax error, try Simbad        
-            if (plx_mas is np.nan or plxe_mas is np.nan) or (np.ma.is_masked(plx_mas) or np.ma.is_masked(plxe_mas)):
-                plx_solution = self.simbad_plx()
-                
-                if plx_solution is False:
-                    term_message = f"Failed for {self.name}: could not find a viable parallax and/or parallax error."
+            # If user provided plx and error then skip this
+            if self._user_plx is None:
+                # if Vizier didn't have a parallax or parallax error, try Simbad        
+                if (plx_mas is np.nan or plxe_mas is np.nan) or (np.ma.is_masked(plx_mas) or np.ma.is_masked(plxe_mas)):
+                    plx_solution = self.simbad_plx()
                     
-                    return False, term_message
-                
-                else:
-                    plx_mas, plxe_mas = plx_solution
+                    if plx_solution is False:
+                        term_message = f"Failed for {self.name}: could not find a viable parallax and/or parallax error.\
+                            You are able to pass a parallax and error manually if possible."
+                        
+                        return False, term_message
+                    
+                    else:
+                        plx_mas, plxe_mas = plx_solution
                 
         
         if len(photometry.index) < self._tol:
@@ -380,16 +389,19 @@ class MeasuredPhotometry(object):
             
             return False, term_message
         
-        
-        # parallaxes are converted from milliarcsec to arcsec
-        parallax = plx_mas[0] / 1000
-        parallax_error = plxe_mas[0] / 1000
+        if self._user_plx is not None:
+            # user-provided parallaxes are in arcsec
+            parallax, parallax_error = self._user_plx
+        else:
+            # parallaxes from Gaia are converted from milliarcsec to arcsec
+            parallax = plx_mas[0] / 1000
+            parallax_error = plxe_mas[0] / 1000
         
         
         # Luri et al. 2018 suggest a full Bayesian approach for dealing with negitive parallaxes
         # I'm ignoring this and cutting them out
         if parallax < 0 or parallax_error < 0:
-            term_message = f"Failed for {self.name}: parallax or error is negative. Ignoring Luri+2018 and removing the target."
+            term_message = f"Failed for {self.name}: parallax or error is negative."
             
             return False, term_message
         
