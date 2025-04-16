@@ -237,13 +237,13 @@ def plot_labels(zero_extinction=False):
         r'$M_{\mathsf{\star}}$'
     )
     df.loc['Av', ['label', 'fancy_label', 'fancy_label_unitless']] = (
-        'Av [mag]',
-        r'$A_V \, \mathrm{[mag]}$',
+        'Av (mag)',
+        r'$A_V \, \mathrm{(mag)}$',
         r'$A_V$'
     )
     df.loc['f', ['label', 'fancy_label', 'fancy_label_unitless']] = (
-        'f [mag]',
-        r'$f \, \mathrm{[mag]}$',
+        'f (mag)',
+        r'$f \, \mathrm{(mag)}$',
         r'$f$'
     )
     df.loc['Teff', ['label', 'fancy_label', 'fancy_label_unitless']] = (
