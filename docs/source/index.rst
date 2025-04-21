@@ -8,6 +8,9 @@ primarily developed for young stars.
 
    This project is under active development on `GitHub <https://github.com/mjfields/stelpar>`_.
 
+If you use stelpar in your work, please cite 
+`Fields et al. (2025) <(https://doi.org/10.1093/rasti/rzaf009)>`_. DOI: 10.1093/rasti/rzaf009.
+
 Contents
 --------
 
