@@ -328,6 +328,12 @@ class PhotometryMetadata(object):
                     ('I/259/tyc2', 'tycho_vmag'),
                     
                     ('I/239/hip_main', 'hipparcos_hpmag'),
+
+                    ('II/349/ps1', 'ps1_gmag'),
+                    ('II/349/ps1', 'ps1_rmag'),
+                    ('II/349/ps1', 'ps1_imag'),
+                    ('II/349/ps1', 'ps1_zmag'),
+                    ('II/349/ps1', 'ps1_ymag')
                     ],
                 names=[
                     'catalog',
@@ -362,6 +368,12 @@ class PhotometryMetadata(object):
         self._default_photometry.loc[('I/259/tyc2', 'tycho_vmag'), ('magnitude', 'error', 'system', 'isochrone_analog')] = 'VTmag', 'e_VTmag', 'VEGA', 'tycho_vmag'
         
         self._default_photometry.loc[('I/239/hip_main', 'hipparcos_hpmag'), ('magnitude', 'error', 'system', 'isochrone_analog')] = 'Hpmag', 'e_Hpmag', 'VEGA', 'hipparcos_hpmag'
+
+        self._default_photometry.loc[('II/349/ps1', 'ps1_gmag'), ('magnitude', 'error', 'system', 'isochrone_analog')] = 'gmag', 'e_gmag', 'AB', 'ps1_gmag'
+        self._default_photometry.loc[('II/349/ps1', 'ps1_rmag'), ('magnitude', 'error', 'system', 'isochrone_analog')] = 'rmag', 'e_rmag', 'AB', 'ps1_rmag'
+        self._default_photometry.loc[('II/349/ps1', 'ps1_imag'), ('magnitude', 'error', 'system', 'isochrone_analog')] = 'imag', 'e_imag', 'AB', 'ps1_imag'
+        self._default_photometry.loc[('II/349/ps1', 'ps1_zmag'), ('magnitude', 'error', 'system', 'isochrone_analog')] = 'zmag', 'e_zmag', 'AB', 'ps1_zmag'
+        self._default_photometry.loc[('II/349/ps1', 'ps1_ymag'), ('magnitude', 'error', 'system', 'isochrone_analog')] = 'ymag', 'e_ymag', 'AB', 'ps1_ymag'
         
         
         self._photometry = self._default_photometry.copy()
