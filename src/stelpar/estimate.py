@@ -314,6 +314,7 @@ class Estimate(object):
         
         except:
             self._cleanup()
+            raise
         
         
         
