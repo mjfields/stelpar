@@ -96,11 +96,11 @@ def filter_profiles_setup(dirpath):
     
     # PS1
     # https://ipp.ifa.hawaii.edu/ps1.filters/
-    filter_profiles.update({'ps_gmag' :  SpectralElement.from_file(dirpath + r'/PS1.g.dat', wave_unit=u.nm)})
-    filter_profiles.update({'ps_rmag' :  SpectralElement.from_file(dirpath + r'/PS1.r.dat', wave_unit=u.nm)})
-    filter_profiles.update({'ps_imag' :  SpectralElement.from_file(dirpath + r'/PS1.i.dat', wave_unit=u.nm)})
-    filter_profiles.update({'ps_zmag' :  SpectralElement.from_file(dirpath + r'/PS1.z.dat', wave_unit=u.nm)})
-    filter_profiles.update({'ps_ymag' :  SpectralElement.from_file(dirpath + r'/PS1.y.dat', wave_unit=u.nm)})
+    filter_profiles.update({'ps1_gmag' :  SpectralElement.from_file(dirpath + r'/PS1.g.dat', wave_unit=u.nm)})
+    filter_profiles.update({'ps1_rmag' :  SpectralElement.from_file(dirpath + r'/PS1.r.dat', wave_unit=u.nm)})
+    filter_profiles.update({'ps1_imag' :  SpectralElement.from_file(dirpath + r'/PS1.i.dat', wave_unit=u.nm)})
+    filter_profiles.update({'ps1_zmag' :  SpectralElement.from_file(dirpath + r'/PS1.z.dat', wave_unit=u.nm)})
+    filter_profiles.update({'ps1_ymag' :  SpectralElement.from_file(dirpath + r'/PS1.y.dat', wave_unit=u.nm)})
     
     
     return filter_profiles
