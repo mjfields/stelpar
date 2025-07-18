@@ -189,16 +189,31 @@ def corner_plot(
     nsamples : int, optional
         The number of random samples to draw from the chains to make the plots.
         If `None`, will use the full chains. The default is `None`.
-    \{contour_fill, contour_outline, diag, grid\}_kws: dicts, optional
-        Dictionaries of keyword arguments. See seaborn.pairplot and seaborn.PairGrid
-        for more information. The difference is here `plot_kws` is broken into "fill" and "outline"
-        keywords for more customization. See the `default_*_kws` below for an example.
-        The defaults are `None`.
     show_titles : bool, optional
         Whether to show titles above each diagonal controlled by `title_{fmt, kws}`.
         The default is `False`
     title_fmt : str, optional
-        The 
+        Format the title strings of the diagonal axes. Default is '.2f'.
+    title_kws : dict, optional
+        Additional keyword arguments to pass to each title of the diagonal axes. Default is `None`.
+    **customization_kwargs : dict, optional
+        Additional keyword arguments used to change the style of the figure. See seaborn.pairplot and 
+        seaborn.PairGrid for more information. The difference is here `plot_kws` is broken into 
+        "fill" and "outline" keywords for more customization. The defaults are `None`. 
+
+        Options include:
+            - `contour_fill_kws` : dict
+                Controls the 2D contour fill.
+                If `None`, uses `dict(fill=True, color='gray', levels=4, cut=0)`.
+            - `contour_outline_kws` : dict
+                Controls the 2D contour outline.
+                If `None`, uses `dict(fill=False, color='black', levels=4, linewidths=3, cut=0)`.
+            - `diag_kws` : dict
+                Controls the 1D histograms at the diagonal.
+                If `None`, uses `dict(fill=True, color='gray', edgecolor='black', linewidth=3, cut=0)`.
+            - `grid_kws` : dict
+                Controls the overall grid of plots.
+                If `None`, uses `dict(corner=True, diag_sharey=False)`.
         
     Returns
     -------
