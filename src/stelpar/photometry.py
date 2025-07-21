@@ -870,7 +870,15 @@ class SyntheticPhotometry(object):
     
     
     
-    def photometry_model(self, age, mass, Av, Teff_prior=None, zero_extinction=False):
+    def photometry_model(
+            self, 
+            age, 
+            mass, 
+            Av, 
+            Teff_prior=None,
+            Teff_bounds=None,
+            zero_extinction=False
+        ):
         """
         Combines the estimated photometry from the isochrone with the calculated extinction
         to form a model which can be used as a fit against the measured photometry.
@@ -886,6 +894,9 @@ class SyntheticPhotometry(object):
         Teff_prior : tuple, optional
             The (mean, std) pair used to calculate the logarithm of the effective temperature 
             prior using a normal distribution. The default is None.
+        Teff_bounds : tuple, optional
+            The (lower, upper) pair used to draw the bounds of the effective temperature. 
+            The default is None.
         zero_extinction : bool, optional
             If `True`, set extinction to zero (Av=0). The default is `False`.
 
@@ -907,6 +918,12 @@ class SyntheticPhotometry(object):
         Teff = interpolated_data.loc[(age, mass), 'Teff']
         
         if np.isnan(Teff):
+            return False, Teff_prior
+        
+        teff_lower, teff_upper = Teff_bounds
+        if not np.isnan(teff_lower) and Teff < teff_lower:
+            return False, Teff_prior
+        if not np.isnan(teff_upper) and Teff > teff_upper:
             return False, Teff_prior
         
         if Teff_prior:

@@ -82,7 +82,15 @@ class Probability(object):
         
         # Teff prior is handled here from the phot model func since it's not a fit parameter
         Teff_prior = self.initial_conditions.loc['Teff', 'prior']
-        model, log_teff_prior = self._photometry_model(age, mass, Av, Teff_prior=Teff_prior, zero_extinction=self._zero_extinction)
+        Teff_bounds = self.initial_conditions.loc['Teff', 'bounds']
+        model, log_teff_prior = self._photometry_model(
+            age, 
+            mass, 
+            Av, 
+            Teff_prior=Teff_prior,
+            Teff_bounds=Teff_bounds,
+            zero_extinction=self._zero_extinction
+        )
         
         if model is False:
             self.log_teff_prior = 0
