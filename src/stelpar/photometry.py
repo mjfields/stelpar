@@ -920,11 +920,12 @@ class SyntheticPhotometry(object):
         if np.isnan(Teff):
             return False, Teff_prior
         
-        teff_lower, teff_upper = Teff_bounds
-        if not np.isnan(teff_lower) and Teff < teff_lower:
-            return False, Teff_prior
-        if not np.isnan(teff_upper) and Teff > teff_upper:
-            return False, Teff_prior
+        if Teff_bounds is not None:
+            teff_lower, teff_upper = Teff_bounds
+            if not np.isnan(teff_lower) and Teff < teff_lower:
+                return False, Teff_prior
+            if not np.isnan(teff_upper) and Teff > teff_upper:
+                return False, Teff_prior
         
         if Teff_prior:
             if not np.nan in Teff_prior:
