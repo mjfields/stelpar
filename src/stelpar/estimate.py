@@ -893,6 +893,7 @@ class EstimateResults(object):
         if isinstance(target, str):
             target_info = f"{target!r}"
             prior_info = ''
+            bounds_info = ''
         elif isinstance(target, Target):
             if target.coords is None:
                 target_info = f"{target.name!r}"
@@ -904,6 +905,12 @@ class EstimateResults(object):
             useful_priors = [(param, *priors.loc[param], units[param]) for param in priors.index if np.nan not in priors.loc[param]]
             for tup in useful_priors:
                 prior_info = prior_info + f"\n   - {tup[0]}: {tup[1]} +/- {tup[2]} {tup[3]}"
+            
+            bounds_info = '\n - bounds:'
+            bounds = target.initial_conditions.loc[target.name, 'bounds']
+            useful_bounds = [(param, *priors.loc[param], units[param]) for param in bounds.index]
+            for tup in useful_bounds:
+                bounds_info = bounds_info + f"\n   - {tup[0]}: {tup[1]} +/- {tup[2]} {tup[3]}"
             
         elif target is None:
             return "\nNo results"
@@ -956,6 +963,7 @@ class EstimateResults(object):
             "** Setup **"
             f"\n{options_info}"
             f"\n{prior_info}"
+            f"\n{bounds_info}"
             "\n\n"
             "** Results **"
             f"\n{stats_info}"
