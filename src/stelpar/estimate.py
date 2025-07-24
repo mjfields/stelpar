@@ -910,7 +910,7 @@ class EstimateResults(object):
             bounds = target.initial_conditions.loc[target.name, 'bounds']
             useful_bounds = [(param, *bounds.loc[param], units[param]) for param in bounds.index]
             for tup in useful_bounds:
-                bounds_info = bounds_info + f"\n   - {tup[0]}: {tup[1]} +/- {tup[2]} {tup[3]}"
+                bounds_info = bounds_info + f"\n   - {tup[0]}: ({tup[1]}, {tup[2]}) {tup[3]}"
             
         elif target is None:
             return "\nNo results"
