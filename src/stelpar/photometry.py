@@ -333,7 +333,7 @@ class MeasuredPhotometry(object):
                         
                         mag, error, system, analog = meta.loc[(catalog, band)]
                         
-                        if len(table[mag]) != 1 or len(table[error]) != 1:
+                        if len(table[mag]) != 1 or len(table[error]) != 1 or table[error] == 0:
                             photometry.loc[band, 'apparent_magnitude'] = np.nan
                             photometry.loc[band, 'apparent_magnitude_error'] = np.nan
                             photometry.loc[band, 'system'] = system.upper()
