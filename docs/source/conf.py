@@ -3,20 +3,22 @@ import sys
 
 sys.path.insert(0, os.path.abspath('../../src'))
 
+from stelpar import __version__
+
 # -- Project Information -----------------------------------------------------
 
 project = 'stelpar'
 copyright = '2025, Matt Fields'
 author = 'Matt Fields'
 
+# For now, these are the same
 # The short X.Y version
-version = '0.1.0'
+version = __version__
 
 # The full version, including alpha/beta/rc tags
-release = '0.1.0'
+release = __version__
 
 # -- General Configuration -----------------------------------------------------
-
 extensions = [
     'sphinx.ext.duration',
     'sphinx.ext.doctest',
@@ -25,8 +27,18 @@ extensions = [
     'sphinx.ext.intersphinx',
     'sphinx.ext.napoleon',
     'sphinx.ext.viewcode',
+    'sphinx.ext.mathjax',
     'myst_nb',
-    'IPython.sphinxext.ipython_console_highlighting'
+    'IPython.sphinxext.ipython_console_highlighting',
+    'IPython.sphinxext.ipython_directive',
+    'matplotlib.sphinxext.plot_directive',
+    'numpydoc'
+]
+
+# enables '$...$' latex math rendering
+myst_enable_extensions = [
+    "amsmath",
+    "dollarmath"
 ]
 
 source_suffix = ".rst"
@@ -56,7 +68,6 @@ intersphinx_disabled_domains = ['std']
 templates_path = ["_templates"]
 
 # -- Options for HTML Output -----------------------------------------------------
-
 html_theme = "sphinx_book_theme"
 html_copy_source = True
 html_show_sourcelink = True
@@ -85,3 +96,7 @@ nb_execution_timeout = -1
 
 # -- Options for EPUB Output -----------------------------------------------------
 epub_show_urls = 'footnote'
+
+# -- Plot options ----------------------------------------------------------------
+plot_include_source = True
+plot_formats = [('png', 100), 'pdf']

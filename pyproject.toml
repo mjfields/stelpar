@@ -4,9 +4,9 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "stelpar"
-version = "0.1.0"
+dynamic = ["readme", "version"]
 authors = [
-    {name = "Matthew J. Fields", email = "mjfields@live.unc.edu"},
+    {name = "Matt Fields", email = "fieldsmatthewj@gmail.com"},
 ]
 description = "Stellar parameter estimation and analysis tool"
 requires-python = ">=3.6"
@@ -30,7 +30,6 @@ dependencies = [
     "corner",
     "seaborn"
 ]
-dynamic = ["readme"]
 
 [project.optional-dependencies]
 exe = ["setuptools"]
@@ -39,6 +38,7 @@ notebook = ["jupyter", "h5py"]
 
 [tool.setuptools.dynamic]
 readme = {file = ["README.md"]}
+version = {attr = "stelpar.__version__"}
 
 [tool.setuptools]
 package-dir = {"" = "src"}
