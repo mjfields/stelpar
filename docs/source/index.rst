@@ -25,6 +25,7 @@ Contents
    guide/estimate
    guide/target
    guide/plot
+   guide/photometry
 
 .. toctree::
    :maxdepth: 2
@@ -33,3 +34,4 @@ Contents
    tutorials/quickstart
    tutorials/target_priors_photometry
    tutorials/mcmc_options
+   tutorials/plot_examples
