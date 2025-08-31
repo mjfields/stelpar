@@ -15,7 +15,11 @@ Read the documentation at [stelpar.readthedocs.io](https://stelpar.readthedocs.i
 
 ## Installation
 
-The preferred method to install stelpar at the moment is
+The current preferred method to install stelpar is
+
+`pip install stelpar`
+
+If that does not work, try
 
 `pip install git+https://github.com/mjfields/stelpar.git`
 
