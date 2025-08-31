@@ -3,8 +3,13 @@
 Installation
 ============
 
-The preferred method to install stelpar at the moment is from 
-`GitHub <https://github.com/mjfields/stelpar>`_
+The preferred method to install stelpar is with ``pip``
+
+.. code-block:: bash
+
+    pip install stelpar
+
+Otherwise, you can use
 
 .. code-block:: bash
     
