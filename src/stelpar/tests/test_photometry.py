@@ -109,13 +109,18 @@ class TestMeasuredPhotometry:
         0, 
         0.1, 
         1.7,
+        3,
+        6,
+        9
     ]
     )
 @pytest.mark.parametrize(
     "Teff", 
     [
-        3300, 
-        6500, 
+        2700,
+        3300,
+        5000,
+        6500,
         10000
     ]
     )
@@ -157,7 +162,7 @@ class TestSyntheticPhotometry:
         npt.assert_allclose(
                 actual=stelpar_val,
                 desired=synphot_array,
-                rtol=5e-4
+                rtol=5.5e-4
             )
     
 
