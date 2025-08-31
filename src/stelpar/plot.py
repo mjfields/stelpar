@@ -165,13 +165,22 @@ def corner_plot(
         savefile=None, 
         show=True, 
         nsamples=None,
+        show_titles=False,
+        title_fmt='.2f',
+        title_kws=None,
+
+        levels=4,
+        fill=True,
+        fillcolor='gray',
+        edgecolor='black',
+        linewidths=3,
+        cut=0,
+        bw_adjust=1,
+
         contour_fill_kws=None,
         contour_outline_kws=None, 
         diag_kws=None, 
         grid_kws=None,
-        show_titles=False,
-        title_fmt='.2f',
-        title_kws=None,
     ):
     
     """
@@ -245,16 +254,30 @@ def corner_plot(
     grid = sns.PairGrid(chains.iloc[mask], **default_grid_kws)
 
     ## contour fill
-    default_contour_fill_kws = dict(fill=True, color='gray', levels=4, cut=0)
-    if contour_fill_kws is None:
-        contour_fill_kws = default_contour_fill_kws
-    else:
-        contour_fill_kws = {**default_contour_fill_kws, **contour_fill_kws}
-    
-    grid.map_offdiag(sns.kdeplot, **contour_fill_kws)
+    if fill:
+        default_contour_fill_kws = dict(
+            fill=True,
+            color=fillcolor,
+            levels=levels,
+            cut=cut,
+            bw_adjust=bw_adjust
+        )
+        if contour_fill_kws is None:
+            contour_fill_kws = default_contour_fill_kws
+        else:
+            contour_fill_kws = {**default_contour_fill_kws, **contour_fill_kws}
+        
+        grid.map_offdiag(sns.kdeplot, **contour_fill_kws)
 
     ## contour outline
-    default_contour_outline_kws = dict(fill=False, color='black', levels=4, linewidths=3, cut=0)
+    default_contour_outline_kws = dict(
+        fill=False,
+        color=edgecolor,
+        levels=levels,
+        linewidths=linewidths,
+        cut=cut,
+        bw_adjust=bw_adjust
+    )
     if contour_outline_kws is None:
         contour_outline_kws = default_contour_outline_kws
     else:
@@ -263,7 +286,23 @@ def corner_plot(
     grid.map_offdiag(sns.kdeplot, **contour_outline_kws)
 
     ## diagonal posteriors
-    default_diag_kws = dict(fill=True, color='gray', edgecolor='black', linewidth=3, cut=0)
+    if fill:
+        default_diag_kws = default_diag_kws = dict(
+            fill=True,
+            color=fillcolor,
+            edgecolor=edgecolor,
+            linewidth=linewidths,
+            cut=cut,
+            bw_adjust=bw_adjust
+        )
+    else:
+        default_diag_kws = dict(
+            fill=False,
+            color=edgecolor,
+            linewidth=linewidths,
+            cut=cut,
+            bw_adjust=bw_adjust
+        )
     if diag_kws is None:
         diag_kws = default_diag_kws
     else:
@@ -628,7 +667,7 @@ def flux_v_wavelength(photometry, title=None, singlefig=True, savefile=None, sho
 
 
 
-def mag_v_wavelength(photometry, savefile=None, show=True):
+def _mag_v_wavelength(photometry, savefile=None, show=True):
     
     """
     Creates a plot of absolute magnitude vs. wavelength.
@@ -818,7 +857,7 @@ def mag_v_wavelength_eyecheck(photometry, name=None, savefile=None, show=True):
     -------
     fig : Figure
         `matplotlib.figure.Figure` object which contains the plot elements.
-    
+
     """ 
     
     wav = photometry['wavelength'].divide(1e4) # microns
@@ -846,7 +885,7 @@ def mag_v_wavelength_eyecheck(photometry, name=None, savefile=None, show=True):
         )
     
     ax.set_xlabel(r"$\lambda$ ($\mu$m)")
-    ax.set_ylabel("$m$ [mag]")
+    ax.set_ylabel("apparent magnitude")
     
     ylim = ax.get_ylim()
     
@@ -872,7 +911,7 @@ def mag_v_wavelength_eyecheck(photometry, name=None, savefile=None, show=True):
         plt.close(fig)
     
     
-    # return fig
+    return fig
 
 
 
