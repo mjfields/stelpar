@@ -462,8 +462,7 @@ class SyntheticPhotometry(object):
     
     """
     Uses `synphot` to calculate extinction and add it to the estimated magnitudes.
-    See http://learn.astropy.org/rst-tutorials/color-excess.html?highlight=filtertutorials#example-3-calculate-color-excess-with-synphot
-    for mor information
+    See https://learn.astropy.org/tutorials/color-excess.html for an example.
     
     Parameters
     ----------
@@ -483,7 +482,6 @@ class SyntheticPhotometry(object):
         Can pass additional keyword arguments to be used by the extinction functions.
     interp_kwargs : dict, optional
         Can pass additional keyword arguments to be used by the interpolator function.
-    
     """
     
     def __init__(self, photometry_df, model_grid=None, interp_method='true', extinction_kwargs=None, interp_kwargs=None):
