@@ -3,7 +3,10 @@ import sys
 
 sys.path.insert(0, os.path.abspath('../../src'))
 
-from stelpar import __version__
+import re
+from pathlib import Path
+
+init_file = Path(__file__).resolve().parents[2] / "src" / "stelpar" / "__init__.py"
 
 # -- Project Information -----------------------------------------------------
 
@@ -11,12 +14,19 @@ project = 'stelpar'
 copyright = '2025, Matt Fields'
 author = 'Matt Fields'
 
-# For now, these are the same
-# The short X.Y version
-version = __version__
+version_match = re.search(
+    r'^__version__\s*=\s*[\'"]([^\'"]+)[\'"]',
+    init_file.read_text(encoding="utf-8"),
+    re.MULTILINE
+)
 
-# The full version, including alpha/beta/rc tags
-release = __version__
+if version_match:
+    # The full version, including alpha/beta/rc tags
+    release = version_match.group(1)
+    # The short X.Y version
+    version = version_match.group(1)
+else:
+    raise RuntimeError("Unable to find __version__ in __init__.py")
 
 # -- General Configuration -----------------------------------------------------
 extensions = [
